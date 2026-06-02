@@ -10,22 +10,8 @@ create extension if not exists "uuid-ossp";
 
 
 -- ─────────────────────────────────────────────────────────────────
--- ROLE HELPER  (used by all RLS policies below)
--- Returns the role of the currently logged-in user.
--- security definer so it runs as the function owner, not the caller.
--- ─────────────────────────────────────────────────────────────────
-create or replace function public.get_my_role()
-returns text
-language sql
-security definer
-stable
-as $$
-  select role from public.profiles where id = auth.uid()
-$$;
-
-
--- ─────────────────────────────────────────────────────────────────
 -- 1. PROFILES  (extends auth.users 1-to-1)
+--    Must be first — all other tables and the role helper depend on it.
 -- ─────────────────────────────────────────────────────────────────
 create table public.profiles (
   id                    uuid        primary key references auth.users(id) on delete cascade,
@@ -35,7 +21,7 @@ create table public.profiles (
   gender                text        check (gender in ('male', 'female', 'other')),
   date_of_birth         date,
   profile_picture_url   text,
-  goal                  text,        -- e.g. 'weight_loss', 'muscle_gain', 'general_fitness', 'maintenance'
+  goal                  text,
   slot                  text        check (slot in ('morning', 'evening', 'both')),
   can_create_routine    boolean     not null default false,
   is_active             boolean     not null default true,
@@ -43,8 +29,7 @@ create table public.profiles (
   updated_at            timestamptz not null default now()
 );
 
--- Auto-create a profile row whenever a new auth user is inserted.
--- The admin creates members via Edge Function which passes role in raw_user_meta_data.
+-- ── Trigger: auto-create profile when auth user is created ──────
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -64,7 +49,7 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- Keep updated_at current on every profile update.
+-- ── Trigger: keep updated_at current ────────────────────────────
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -79,7 +64,19 @@ create trigger profiles_updated_at
   before update on public.profiles
   for each row execute procedure public.set_updated_at();
 
--- RLS
+-- ── Role helper (now safe — profiles table exists above) ────────
+-- Returns the role of the currently authenticated user.
+-- security definer so it runs as the function owner, bypassing RLS.
+create or replace function public.get_my_role()
+returns text
+language sql
+security definer
+stable
+as $$
+  select role from public.profiles where id = auth.uid()
+$$;
+
+-- ── RLS on profiles ─────────────────────────────────────────────
 alter table public.profiles enable row level security;
 
 create policy "profiles_select"
@@ -95,16 +92,16 @@ create policy "profiles_update"
 -- 2. MEMBERSHIPS
 -- ─────────────────────────────────────────────────────────────────
 create table public.memberships (
-  id          uuid        primary key default uuid_generate_v4(),
-  member_id   uuid        not null references public.profiles(id) on delete cascade,
-  plan_type   text        not null check (plan_type in ('monthly', 'quarterly', 'annual')),
+  id          uuid          primary key default uuid_generate_v4(),
+  member_id   uuid          not null references public.profiles(id) on delete cascade,
+  plan_type   text          not null check (plan_type in ('monthly', 'quarterly', 'annual')),
   amount      numeric(10,2) not null,
-  start_date  date        not null,
-  end_date    date        not null,
-  is_active   boolean     not null default true,
+  start_date  date          not null,
+  end_date    date          not null,
+  is_active   boolean       not null default true,
   notes       text,
-  created_by  uuid        references public.profiles(id),
-  created_at  timestamptz not null default now()
+  created_by  uuid          references public.profiles(id),
+  created_at  timestamptz   not null default now()
 );
 
 alter table public.memberships enable row level security;
@@ -134,7 +131,7 @@ create table public.attendance (
   member_id      uuid        not null references public.profiles(id) on delete cascade,
   checked_in_at  timestamptz not null default now(),
   slot           text        not null check (slot in ('morning', 'evening')),
-  checked_in_by  uuid        references public.profiles(id),  -- null = self check-in
+  checked_in_by  uuid        references public.profiles(id),
   created_at     timestamptz not null default now()
 );
 
@@ -203,12 +200,12 @@ create policy "routines_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 5. ROUTINE DAYS  (sessions within a routine, e.g. "Day 1 – Push")
+-- 5. ROUTINE DAYS
 -- ─────────────────────────────────────────────────────────────────
 create table public.routine_days (
   id         uuid        primary key default uuid_generate_v4(),
   routine_id uuid        not null references public.routines(id) on delete cascade,
-  day_name   text        not null,   -- "Day 1 – Push", "Day 2 – Pull", etc.
+  day_name   text        not null,
   sort_order int         not null default 0,
   created_at timestamptz not null default now()
 );
@@ -248,15 +245,15 @@ create policy "routine_days_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 6. EXERCISES  (individual exercises within a routine day)
+-- 6. EXERCISES
 -- ─────────────────────────────────────────────────────────────────
 create table public.exercises (
   id              uuid        primary key default uuid_generate_v4(),
   routine_day_id  uuid        not null references public.routine_days(id) on delete cascade,
   name            text        not null,
   sets            int,
-  reps            text,        -- "8-12", "15", "AMRAP", "60 sec"
-  weight          text,        -- "40 kg", "bodyweight", "as needed"
+  reps            text,
+  weight          text,
   rest_seconds    int,
   notes           text,
   sort_order      int         not null default 0,
@@ -310,7 +307,7 @@ create policy "exercises_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 7. EXERCISE LOGS  (member marks exercises done each day)
+-- 7. EXERCISE LOGS
 -- ─────────────────────────────────────────────────────────────────
 create table public.exercise_logs (
   id              uuid        primary key default uuid_generate_v4(),
@@ -346,7 +343,7 @@ create policy "exercise_logs_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 8. BODY STATS  (member tracks weight, measurements, body fat)
+-- 8. BODY STATS
 -- ─────────────────────────────────────────────────────────────────
 create table public.body_stats (
   id            uuid        primary key default uuid_generate_v4(),
@@ -383,7 +380,7 @@ create policy "body_stats_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 9. ANNOUNCEMENTS  (admin posts notices visible to all members)
+-- 9. ANNOUNCEMENTS
 -- ─────────────────────────────────────────────────────────────────
 create table public.announcements (
   id          uuid        primary key default uuid_generate_v4(),
@@ -401,7 +398,6 @@ create trigger announcements_updated_at
 
 alter table public.announcements enable row level security;
 
--- All authenticated users can read active announcements
 create policy "announcements_select"
   on public.announcements for select
   using (auth.uid() is not null);
@@ -420,7 +416,7 @@ create policy "announcements_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- 10. TRAINER NOTES  (private admin notes about a member)
+-- 10. TRAINER NOTES
 -- ─────────────────────────────────────────────────────────────────
 create table public.trainer_notes (
   id          uuid        primary key default uuid_generate_v4(),
@@ -432,7 +428,6 @@ create table public.trainer_notes (
 
 alter table public.trainer_notes enable row level security;
 
--- Member can read notes written about them; admin can read all
 create policy "trainer_notes_select"
   on public.trainer_notes for select
   using (member_id = auth.uid() or get_my_role() = 'admin');
@@ -451,10 +446,10 @@ create policy "trainer_notes_delete"
 
 
 -- ─────────────────────────────────────────────────────────────────
--- SEED: Admin account
--- After running this schema, create your admin user in Supabase Auth
--- (Dashboard → Authentication → Users → Add User), then run:
+-- AFTER RUNNING: promote your admin account
 --
---   update public.profiles set role = 'admin' where id = '<admin-user-uuid>';
+--   update public.profiles
+--   set role = 'admin'
+--   where id = '<your-auth-user-uuid>';
 --
 -- ─────────────────────────────────────────────────────────────────

@@ -46,10 +46,25 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (err) setError(err.message)
-    else navigate('/dashboard')
+    try {
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+      if (err) throw new Error(err.message)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .maybeSingle()
+
+      if (!profile) throw new Error('Account not set up. Contact your administrator.')
+
+      if (profile.role === 'admin') navigate('/admin/dashboard')
+      else navigate('/member/home')
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -74,8 +89,8 @@ export default function Login() {
         <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
           <Link to="/" className="flex items-center gap-2">
             <Dumbbell className="w-5 h-5" style={{ color: V }} aria-hidden="true" />
-            <span className="text-xl font-black text-white leading-none" style={{ fontFamily: BC }}>Iron</span>
-            <span className="text-xl font-black leading-none" style={{ fontFamily: BC, color: V }}>Hub</span>
+            <span className="text-xl font-black text-white leading-none" style={{ fontFamily: BC }}>Golden</span>
+            <span className="text-xl font-black leading-none" style={{ fontFamily: BC, color: V }}>Biceps</span>
           </Link>
 
           <motion.div className="my-auto" initial="hidden" animate="visible" variants={stagger}>
@@ -84,7 +99,7 @@ export default function Login() {
                 className="inline-flex items-center gap-1.5 text-xs font-medium tracking-[0.2em] uppercase px-3 py-1.5 rounded-full mb-5"
                 style={{ fontFamily: IBP, color: V, border: '1px solid rgba(250,204,21,0.3)', background: 'rgba(250,204,21,0.08)' }}
               >
-                GYM MANAGEMENT PLATFORM
+                GOLDEN BICEPS GYM
               </span>
             </motion.div>
 
@@ -172,8 +187,8 @@ export default function Login() {
         >
           <Link to="/" className="flex items-center justify-center gap-1.5 mb-8 lg:hidden">
             <Dumbbell className="w-5 h-5" style={{ color: V }} aria-hidden="true" />
-            <span className="text-2xl font-black text-white" style={{ fontFamily: BC }}>Iron</span>
-            <span className="text-2xl font-black" style={{ fontFamily: BC, color: V }}>Hub</span>
+            <span className="text-2xl font-black text-white" style={{ fontFamily: BC }}>Golden</span>
+            <span className="text-2xl font-black" style={{ fontFamily: BC, color: V }}>Biceps</span>
           </Link>
 
           <div
@@ -183,7 +198,7 @@ export default function Login() {
             <div className="text-center mb-7">
               <h1 className="text-2xl font-black text-white" style={{ fontFamily: BC }}>WELCOME BACK</h1>
               <p className="text-sm mt-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.55)' }}>
-                Sign in to your IronHub account
+                Sign in to your Golden Biceps account
               </p>
             </div>
 
@@ -272,7 +287,7 @@ export default function Login() {
 
           <p className="text-center text-sm mt-6" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>
             <Link to="/" className="transition-colors duration-200 hover:text-white">
-              ← Back to IronHub
+              ← Back to Home
             </Link>
           </p>
         </motion.div>
