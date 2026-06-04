@@ -101,7 +101,7 @@ function AttendanceCalendar({ memberId }) {
 export default function AdminMemberDetail() {
   const { id } = useParams()
   const { data: member, isLoading } = useMember(id)
-  const { mutate: updateMember, isPending: saving }   = useUpdateMember()
+  const { mutate: updateMember, isPending: saving, error: saveError } = useUpdateMember()
   const { mutate: addNote, isPending: addingNote }     = useAddTrainerNote()
   const { mutate: addPlan, isPending: addingPlan }     = useAddSubscription()
 
@@ -208,6 +208,12 @@ export default function AdminMemberDetail() {
                 </button>
               )}
             </div>
+
+            {saveError && (
+              <p className="text-sm mb-4 px-3 py-2 rounded-xl" style={{ fontFamily: INT, color: '#F87171', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)' }}>
+                Save failed: {saveError.message}
+              </p>
+            )}
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Full Name">

@@ -62,9 +62,13 @@ export function useUpdateMember() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ id, ...updates }) => {
+      // Convert empty strings → null so CHECK constraints and date columns don't reject them
+      const cleaned = Object.fromEntries(
+        Object.entries(updates).map(([k, v]) => [k, v === '' ? null : v])
+      )
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(cleaned)
         .eq('id', id)
         .select()
         .single()
