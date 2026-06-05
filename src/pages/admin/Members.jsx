@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UserPlus, Search, X, Eye, ChevronRight } from 'lucide-react'
+import { UserPlus, Search, X, ChevronRight } from 'lucide-react'
 import { useMembers, useCreateMember } from '../../hooks/useMembers'
 
 const BC  = "'Barlow Condensed', sans-serif"
@@ -250,8 +250,8 @@ export default function AdminMembers() {
       <div className="rounded-2xl overflow-hidden" style={{ background: CRD, border: `1px solid ${BRD}` }}>
         {/* Desktop header */}
         <div className="hidden md:grid px-5 py-3"
-          style={{ gridTemplateColumns: '2.2fr 1fr 1.2fr 1.5fr 1fr 40px', borderBottom: `1px solid ${BRD}` }}>
-          {['Member', 'Slot', 'Goal', 'Plan', 'Joined', ''].map(h => (
+          style={{ gridTemplateColumns: '2.2fr 1fr 1.2fr 1.5fr 1fr', borderBottom: `1px solid ${BRD}` }}>
+          {['Member', 'Slot', 'Goal', 'Plan', 'Joined'].map(h => (
             <div key={h} className="text-[11px] font-semibold uppercase tracking-wider"
               style={{ fontFamily: INT, color: 'rgba(249,250,251,0.35)' }}>{h}</div>
           ))}
@@ -273,9 +273,9 @@ export default function AdminMembers() {
           <>
             {/* Desktop rows */}
             {filtered.map((m, i) => (
-              <div key={m.id}
-                className="hidden md:grid items-center px-5 py-3.5 transition-colors hover:bg-white/[0.025]"
-                style={{ gridTemplateColumns: '2.2fr 1fr 1.2fr 1.5fr 1fr 40px', borderBottom: i < filtered.length - 1 ? `1px solid ${BRD}` : 'none' }}>
+              <Link key={m.id} to={`/admin/members/${m.id}`}
+                className="hidden md:grid items-center px-5 py-3.5 cursor-pointer transition-colors hover:bg-white/[0.025]"
+                style={{ gridTemplateColumns: '2.2fr 1fr 1.2fr 1.5fr 1fr', borderBottom: i < filtered.length - 1 ? `1px solid ${BRD}` : 'none' }}>
                 {/* Name */}
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -299,12 +299,7 @@ export default function AdminMembers() {
                 <span className="text-xs" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.35)' }}>
                   {new Date(m.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
                 </span>
-                <Link to={`/admin/members/${m.id}`}
-                  className="p-1.5 rounded-lg transition-colors hover:text-white"
-                  style={{ color: 'rgba(249,250,251,0.3)' }}>
-                  <Eye className="w-4 h-4" />
-                </Link>
-              </div>
+              </Link>
             ))}
 
             {/* Mobile rows */}

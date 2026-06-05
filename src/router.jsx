@@ -21,6 +21,7 @@ import MemberAttendance   from './pages/member/Attendance'
 import MemberSubscription from './pages/member/Subscription'
 import MemberRoutine      from './pages/member/Routine'
 import MemberProgress     from './pages/member/Progress'
+import MemberProfile      from './pages/member/Profile'
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
       { path: '/member/subscription', element: <MemberSubscription /> },
       { path: '/member/routine',      element: <MemberRoutine />      },
       { path: '/member/progress',     element: <MemberProgress />     },
+      { path: '/member/profile',      element: <MemberProfile />      },
     ],
   },
 ])

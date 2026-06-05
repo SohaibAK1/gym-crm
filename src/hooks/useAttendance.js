@@ -41,16 +41,38 @@ export function useMemberAttendance(memberId) {
 export function useMarkAttendance() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ member_id, slot }) => {
+    mutationFn: async ({ member_id, slot, date }) => {
       const { data: { user } } = await supabase.auth.getUser()
+      // For past dates use noon of that day; for today use current time
+      const checked_in_at = date
+        ? `${date}T12:00:00`
+        : new Date().toISOString()
       const { data, error } = await supabase
         .from('attendance')
-        .insert({ member_id, slot, checked_in_by: user.id })
+        .insert({ member_id, slot, checked_in_by: user.id, checked_in_at })
         .select()
       if (error) throw error
       return data
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['attendance'] }),
+  })
+}
+
+export function useSelfCheckIn() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ slot }) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data, error } = await supabase
+        .from('attendance')
+        .insert({ member_id: user.id, slot })
+        .select()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['member-attendance-all'] })
+    },
   })
 }
 

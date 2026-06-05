@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlusCircle, X, Dumbbell, ChevronRight, Users } from 'lucide-react'
-import { useRoutines, useCreateRoutine } from '../../hooks/useRoutines'
+import { useRoutines, useCreateRoutine, useUpdateRoutine } from '../../hooks/useRoutines'
 import { useMembers } from '../../hooks/useMembers'
 
 const BC  = "'Barlow Condensed', sans-serif"
@@ -115,9 +115,16 @@ function NewRoutineModal({ open, onClose }) {
 
 export default function AdminRoutines() {
   const { data: routines = [], isLoading } = useRoutines()
+  const { mutate: updateRoutine }          = useUpdateRoutine()
   const [showModal, setShowModal]          = useState(false)
 
   const totalExercises = (r) => r.routine_days?.reduce((s, d) => s + (d.exercises?.length ?? 0), 0) ?? 0
+
+  const toggleActive = (e, r) => {
+    e.preventDefault()   // stop the Link navigation
+    e.stopPropagation()
+    updateRoutine({ id: r.id, is_active: !r.is_active })
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -168,10 +175,13 @@ export default function AdminRoutines() {
                   style={{ background: 'rgba(250,204,21,0.1)' }}>
                   <Dumbbell className="w-4 h-4" style={{ color: YLW }} />
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${r.is_active ? '' : 'opacity-50'}`}
-                  style={{ fontFamily: INT, color: r.is_active ? '#34D399' : 'rgba(249,250,251,0.4)', background: r.is_active ? 'rgba(52,211,153,0.1)' : 'rgba(249,250,251,0.05)' }}>
+                <button
+                  onClick={e => toggleActive(e, r)}
+                  className="text-xs px-2 py-0.5 rounded-full font-medium transition-opacity hover:opacity-70"
+                  style={{ fontFamily: INT, color: r.is_active ? '#34D399' : 'rgba(249,250,251,0.4)', background: r.is_active ? 'rgba(52,211,153,0.1)' : 'rgba(249,250,251,0.05)' }}
+                  title={r.is_active ? 'Click to deactivate' : 'Click to activate'}>
                   {r.is_active ? 'Active' : 'Inactive'}
-                </span>
+                </button>
               </div>
 
               <div>

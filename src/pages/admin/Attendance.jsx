@@ -44,7 +44,10 @@ export default function AdminAttendance() {
   }, [members, alreadyIn, memberSearch])
 
   const handleMark = (member_id, slot) => {
-    mark({ member_id, slot }, { onSuccess: () => { setShowPicker(false); setMemberSearch('') } })
+    mark(
+      { member_id, slot, date: isToday ? null : dateStr },
+      { onSuccess: () => { setShowPicker(false); setMemberSearch('') } }
+    )
   }
 
   const prevDay = () => { const d = new Date(date); d.setDate(d.getDate() - 1); setDate(d) }
@@ -59,13 +62,12 @@ export default function AdminAttendance() {
           <h1 className="text-4xl font-black text-white mb-1" style={{ fontFamily: BC }}>ATTENDANCE</h1>
           <p className="text-sm" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>{fmtDate(date)}</p>
         </div>
-        {isToday && (
-          <button onClick={() => setShowPicker(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-opacity hover:opacity-80"
-            style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>
-            <CheckCircle className="w-4 h-4" /> Mark Attendance
-          </button>
-        )}
+        <button onClick={() => setShowPicker(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-opacity hover:opacity-80"
+          style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>
+          <CheckCircle className="w-4 h-4" />
+          {isToday ? 'Mark Attendance' : 'Add Record'}
+        </button>
       </div>
 
       {/* Date nav */}
@@ -202,13 +204,11 @@ export default function AdminAttendance() {
                 <span className="text-xs" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.35)' }}>
                   {fmtTime(r.checked_in_at)}
                 </span>
-                {isToday && (
-                  <button onClick={() => remove(r.id)}
-                    className="p-1.5 rounded-lg transition-colors text-gray-600 hover:text-red-400"
-                    title="Undo">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <button onClick={() => remove(r.id)}
+                  className="p-1.5 rounded-lg transition-colors text-gray-600 hover:text-red-400"
+                  title="Remove record">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           ))
