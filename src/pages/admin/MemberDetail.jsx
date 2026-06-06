@@ -319,7 +319,6 @@ export default function AdminMemberDetail() {
               </div>
             )}
           </div>
-        </div>
 
           {/* ── Body Stats ── */}
           <div className="rounded-2xl p-6" style={{ background: CRD, border: `1px solid ${BRD}` }}>
@@ -402,8 +401,8 @@ export default function AdminMemberDetail() {
                       <p className="text-xs mb-0.5" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
                       <p className="text-xl font-black" style={{ fontFamily: IBP, color }}>
                         {bodyStats[0][key] != null
-                          ? <>{bodyStats[0][key]}<span className="text-xs font-normal ml-0.5" style={{ color: 'rgba(249,250,251,0.4)' }}>{unit}</span></>
-                          : <span style={{ color: 'rgba(249,250,251,0.2)' }}>—</span>
+                          ? `${bodyStats[0][key]} ${unit}`
+                          : '—'
                         }
                       </p>
                     </div>
