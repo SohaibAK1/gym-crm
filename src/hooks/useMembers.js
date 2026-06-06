@@ -98,3 +98,41 @@ export function useAddTrainerNote() {
     onSuccess: (_d, { member_id }) => queryClient.invalidateQueries({ queryKey: ['member', member_id] }),
   })
 }
+
+export function useAdminBodyStats(memberId) {
+  return useQuery({
+    queryKey: ['body-stats-admin', memberId],
+    enabled: !!memberId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('body_stats')
+        .select('*')
+        .eq('member_id', memberId)
+        .order('logged_at', { ascending: false })
+        .limit(20)
+      if (error) throw error
+      return data ?? []
+    },
+  })
+}
+
+export function useAdminLogBodyStats() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ member_id, ...stats }) => {
+      const cleaned = Object.fromEntries(
+        Object.entries(stats).map(([k, v]) => [k, v === '' ? null : v])
+      )
+      const { data, error } = await supabase
+        .from('body_stats')
+        .insert({ ...cleaned, member_id })
+        .select()
+        .single()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_d, { member_id }) => {
+      queryClient.invalidateQueries({ queryKey: ['body-stats-admin', member_id] })
+    },
+  })
+}

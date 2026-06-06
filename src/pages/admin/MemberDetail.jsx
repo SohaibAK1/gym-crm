@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Save, Loader, Plus, CheckCircle, XCircle } from 'lucide-react'
-import { useMember, useUpdateMember, useAddTrainerNote } from '../../hooks/useMembers'
+import { ArrowLeft, Save, Loader, Plus, CheckCircle, XCircle, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { useMember, useUpdateMember, useAddTrainerNote, useAdminBodyStats, useAdminLogBodyStats } from '../../hooks/useMembers'
 import { useMemberAttendance } from '../../hooks/useAttendance'
 import { useAddSubscription } from '../../hooks/useSubscriptions'
 
@@ -104,6 +104,20 @@ export default function AdminMemberDetail() {
   const { mutate: updateMember, isPending: saving, error: saveError } = useUpdateMember()
   const { mutate: addNote, isPending: addingNote }     = useAddTrainerNote()
   const { mutate: addPlan, isPending: addingPlan }     = useAddSubscription()
+  const { data: bodyStats = [] }                       = useAdminBodyStats(id)
+  const { mutate: logStats, isPending: loggingStats, error: statsError } = useAdminLogBodyStats()
+
+  const [showStatsForm, setShowStatsForm] = useState(false)
+  const blankStats = { logged_at: new Date().toISOString().split('T')[0], weight_kg: '', height_cm: '', chest_cm: '', waist_cm: '', hips_cm: '', bicep_cm: '', body_fat_pct: '', notes: '' }
+  const [statsForm, setStatsForm] = useState(blankStats)
+  const setS = k => e => setStatsForm(f => ({ ...f, [k]: e.target.value }))
+
+  const handleLogStats = e => {
+    e.preventDefault()
+    logStats({ member_id: id, ...statsForm }, {
+      onSuccess: () => { setStatsForm(blankStats); setShowStatsForm(false) },
+    })
+  }
 
   const [form, setForm]       = useState({})
   const [dirty, setDirty]     = useState(false)
@@ -306,6 +320,131 @@ export default function AdminMemberDetail() {
             )}
           </div>
         </div>
+
+          {/* ── Body Stats ── */}
+          <div className="rounded-2xl p-6" style={{ background: CRD, border: `1px solid ${BRD}` }}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" style={{ color: YLW }} />
+                <h2 className="text-lg font-black text-white" style={{ fontFamily: BC }}>BODY STATS</h2>
+              </div>
+              <button
+                onClick={() => setShowStatsForm(v => !v)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-opacity hover:opacity-80"
+                style={{ fontFamily: INT, background: showStatsForm ? 'rgba(249,250,251,0.08)' : YLW, color: showStatsForm ? 'rgba(249,250,251,0.7)' : '#0A0A0A' }}
+              >
+                {showStatsForm ? <><ChevronUp className="w-3.5 h-3.5" /> Cancel</> : <><Plus className="w-3.5 h-3.5" /> Log Entry</>}
+              </button>
+            </div>
+
+            {/* Log form */}
+            {showStatsForm && (
+              <motion.form
+                initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+                onSubmit={handleLogStats}
+                className="mb-5 p-4 rounded-xl space-y-3"
+                style={{ background: 'rgba(249,250,251,0.03)', border: `1px solid ${BRD}` }}
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { k: 'logged_at',    label: 'Date',         type: 'date'   },
+                    { k: 'weight_kg',    label: 'Weight (kg)',  type: 'number' },
+                    { k: 'chest_cm',     label: 'Chest (cm)',   type: 'number' },
+                    { k: 'waist_cm',     label: 'Waist (cm)',   type: 'number' },
+                    { k: 'hips_cm',      label: 'Hips (cm)',    type: 'number' },
+                    { k: 'bicep_cm',     label: 'Bicep (cm)',   type: 'number' },
+                    { k: 'body_fat_pct', label: 'Body Fat (%)', type: 'number' },
+                    { k: 'height_cm',    label: 'Height (cm)',  type: 'number' },
+                  ].map(({ k, label, type }) => (
+                    <div key={k}>
+                      <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
+                      <input type={type} step="0.1" value={statsForm[k]} onChange={setS(k)}
+                        className="w-full px-3 py-2 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
+                        style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.12)' }}
+                        onFocus={e => { e.target.style.borderColor = 'rgba(250,204,21,0.45)' }}
+                        onBlur={e  => { e.target.style.borderColor = 'rgba(250,204,21,0.12)' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>Notes</p>
+                  <input value={statsForm.notes} onChange={setS('notes')} placeholder="Optional note"
+                    className="w-full px-3 py-2 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
+                    style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.12)' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(250,204,21,0.45)' }}
+                    onBlur={e  => { e.target.style.borderColor = 'rgba(250,204,21,0.12)' }}
+                  />
+                </div>
+                {statsError && <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{statsError.message}</p>}
+                <button type="submit" disabled={loggingStats}
+                  className="w-full py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
+                  style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>
+                  {loggingStats ? <Loader className="w-4 h-4 animate-spin" /> : 'Save Entry'}
+                </button>
+              </motion.form>
+            )}
+
+            {/* Latest measurements */}
+            {bodyStats.length > 0 ? (
+              <>
+                <p className="text-[10px] uppercase tracking-wider mb-3" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.35)' }}>
+                  Latest — {fmtDate(bodyStats[0].logged_at)}
+                </p>
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  {[
+                    { key: 'weight_kg',    label: 'Weight',   unit: 'kg',  color: YLW         },
+                    { key: 'chest_cm',     label: 'Chest',    unit: 'cm',  color: '#34D399'   },
+                    { key: 'waist_cm',     label: 'Waist',    unit: 'cm',  color: '#FB923C'   },
+                    { key: 'bicep_cm',     label: 'Bicep',    unit: 'cm',  color: '#60A5FA'   },
+                  ].map(({ key, label, unit, color }) => (
+                    <div key={key} className="rounded-xl p-3" style={{ background: 'rgba(249,250,251,0.04)' }}>
+                      <p className="text-xs mb-0.5" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
+                      <p className="text-xl font-black" style={{ fontFamily: IBP, color }}>
+                        {bodyStats[0][key] != null
+                          ? <>{bodyStats[0][key]}<span className="text-xs font-normal ml-0.5" style={{ color: 'rgba(249,250,251,0.4)' }}>{unit}</span></>
+                          : <span style={{ color: 'rgba(249,250,251,0.2)' }}>—</span>
+                        }
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* History */}
+                {bodyStats.length > 1 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider mb-2" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.35)' }}>History</p>
+                    <div className="space-y-2">
+                      {bodyStats.slice(1).map(s => (
+                        <div key={s.id} className="flex items-center justify-between py-2.5 px-3 rounded-xl"
+                          style={{ background: 'rgba(249,250,251,0.03)' }}>
+                          <p className="text-xs" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.55)' }}>{fmtDate(s.logged_at)}</p>
+                          <div className="flex items-center gap-4">
+                            {s.weight_kg && <span className="text-xs font-semibold" style={{ fontFamily: IBP, color: YLW }}>{s.weight_kg} kg</span>}
+                            {s.waist_cm  && <span className="text-xs" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{s.waist_cm}cm waist</span>}
+                            {s.body_fat_pct && <span className="text-xs" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{s.body_fat_pct}% fat</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <TrendingUp className="w-8 h-8 mx-auto mb-3" style={{ color: 'rgba(249,250,251,0.12)' }} />
+                <p className="text-sm" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.3)' }}>
+                  No body stats logged yet.
+                </p>
+                <button onClick={() => setShowStatsForm(true)}
+                  className="mt-3 text-xs font-semibold transition-opacity hover:opacity-70"
+                  style={{ fontFamily: INT, color: YLW }}>
+                  + Log first entry
+                </button>
+              </div>
+            )}
+          </div>
+        </div>{/* end lg:col-span-2 */}
 
         {/* ── Right column (membership + routine) ── */}
         <div className="space-y-4">
