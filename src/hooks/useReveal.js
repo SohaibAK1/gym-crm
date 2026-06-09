@@ -1,17 +1,7 @@
 import { useEffect } from 'react'
 
-/**
- * Observes every [data-reveal] element in the document.
- * When an element enters the viewport it receives the `is-visible` class,
- * which triggers the CSS animation defined in index.css.
- * Stagger delay is controlled by the --si CSS custom property (0, 1, 2…)
- * set inline on each element: style={{ '--si': index }}.
- */
 export function useReveal() {
   useEffect(() => {
-    const targets = document.querySelectorAll('[data-reveal]')
-    if (!targets.length) return
-
     const obs = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -23,7 +13,28 @@ export function useReveal() {
       { threshold: 0.1, rootMargin: '0px 0px -52px 0px' }
     )
 
-    targets.forEach((el) => obs.observe(el))
-    return () => obs.disconnect()
+    const observe = (root) => {
+      root.querySelectorAll('[data-reveal]').forEach((el) => obs.observe(el))
+    }
+
+    // Observe elements already in the DOM
+    observe(document)
+
+    // Pick up [data-reveal] elements added by lazy-loaded sections
+    const mutObs = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (!(node instanceof Element)) continue
+          if (node.matches('[data-reveal]')) obs.observe(node)
+          node.querySelectorAll('[data-reveal]').forEach((el) => obs.observe(el))
+        }
+      }
+    })
+    mutObs.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      obs.disconnect()
+      mutObs.disconnect()
+    }
   }, [])
 }

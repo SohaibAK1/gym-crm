@@ -11,9 +11,9 @@ export default function TiltCard({
 }) {
   const ref = useRef(null);
 
-  const rotX = useSpring(useMotionValue(0), { stiffness: 120, damping: 30, mass: 1.5 });
-  const rotY = useSpring(useMotionValue(0), { stiffness: 120, damping: 30, mass: 1.5 });
-  const sc   = useSpring(useMotionValue(1), { stiffness: 120, damping: 30, mass: 1.5 });
+  const rotX = useSpring(useMotionValue(0), { stiffness: 120, damping: 30, mass: 0.5 });
+  const rotY = useSpring(useMotionValue(0), { stiffness: 120, damping: 30, mass: 0.5 });
+  const sc   = useSpring(useMotionValue(1), { stiffness: 120, damping: 30, mass: 0.5 });
 
   const handleMouseMove = (e) => {
     if (!ref.current) return;

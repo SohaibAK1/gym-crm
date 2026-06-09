@@ -115,6 +115,7 @@ export default function Aurora({
   propsRef.current = { colorStops, amplitude, blend, speed }
 
   const ctnDom = useRef(null)
+  const isVisible = useRef(false)
 
   useEffect(() => {
     const ctn = ctnDom.current
@@ -141,6 +142,7 @@ export default function Aurora({
     const geometry = new Triangle(gl)
     if (geometry.attributes.uv) delete geometry.attributes.uv
 
+    // Parse colors once — not on every frame
     const colorStopsArray = colorStops.map(hex => {
       const c = new Color(hex)
       return [c.r, c.g, c.b]
@@ -161,17 +163,20 @@ export default function Aurora({
     const mesh = new Mesh(gl, { geometry, program })
     ctn.appendChild(gl.canvas)
 
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => { isVisible.current = entry.isIntersecting },
+      { threshold: 0 }
+    )
+    visibilityObserver.observe(ctn)
+
     let animateId = 0
     const update = t => {
       animateId = requestAnimationFrame(update)
-      const { speed: s = 1.0, amplitude: a = 1.0, blend: b = 0.5, colorStops: stops } = propsRef.current
+      if (!isVisible.current) return
+      const { speed: s = 1.0, amplitude: a = 1.0, blend: b = 0.5 } = propsRef.current
       program.uniforms.uTime.value = t * 0.001 * s * 0.1
       program.uniforms.uAmplitude.value = a
       program.uniforms.uBlend.value = b
-      program.uniforms.uColorStops.value = stops.map(hex => {
-        const c = new Color(hex)
-        return [c.r, c.g, c.b]
-      })
       renderer.render({ scene: mesh })
     }
     animateId = requestAnimationFrame(update)
@@ -179,6 +184,7 @@ export default function Aurora({
 
     return () => {
       cancelAnimationFrame(animateId)
+      visibilityObserver.disconnect()
       window.removeEventListener('resize', resize)
       if (ctn && gl.canvas.parentNode === ctn) ctn.removeChild(gl.canvas)
       gl.getExtension('WEBGL_lose_context')?.loseContext()
