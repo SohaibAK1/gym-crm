@@ -3,10 +3,10 @@ import CountUp from '../../components/bits/CountUp'
 import { BC, INT, IBP, SRF, BDR } from './constants'
 
 const STATS = [
-  { val: 500, suffix: '+',   label: 'GYMS RUNNING ON IRONHUB',   sub: 'Across 18 countries' },
-  { val: 50,  suffix: 'K+',  label: 'MEMBERS TRACKED EVERY DAY', sub: 'Real-time data' },
-  { val: 98,  suffix: '%',   label: 'AVERAGE MEMBER RETENTION',  sub: 'Industry avg: 72%' },
-  { val: 99,  suffix: '.9%', label: 'UPTIME SERVICE LEVEL',      sub: 'Enterprise grade' },
+  { val: 2400, suffix: '+',  label: 'ACTIVE MEMBERS',          sub: 'And growing every month' },
+  { val: 85,   suffix: 'K+', label: 'WORKOUTS LOGGED',         sub: 'Across all members'       },
+  { val: 93,   suffix: '%',  label: 'WEEKLY ATTENDANCE RATE',  sub: 'Members who show up'      },
+  { val: 4.9,  suffix: '/5', label: 'AVERAGE MEMBER RATING',   sub: 'Based on member feedback' },
 ]
 
 export default function Stats() {
@@ -28,7 +28,7 @@ export default function Stats() {
                 {label}
               </span>
             </div>
-            <span className="text-xs tracking-[0.2em] uppercase" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
+            <span className="text-xs tracking-[0.2em] uppercase" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.62)' }}>
               {sub}
             </span>
           </div>

@@ -13,10 +13,10 @@ export default function Footer() {
               <span className="font-black text-white/50 text-base" style={{ fontFamily: BC }}>Iron</span>
               <span className="font-black text-base" style={{ fontFamily: BC, color: 'rgba(250,204,21,0.5)' }}>Hub</span>
             </div>
-            <p className="text-xs" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.35)' }}>Built for serious gym operators.</p>
+            <p className="text-xs" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.35)' }}>Built for members who show up.</p>
           </div>
           <div className="flex items-center gap-8">
-            {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }].map(({ label, href }) => (
+            {[{ label: 'Features', href: '#features' }, { label: 'How It Works', href: '#how-it-works' }].map(({ label, href }) => (
               <a
                 key={label}
                 href={href}

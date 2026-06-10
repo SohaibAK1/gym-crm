@@ -37,16 +37,16 @@ export default function CTASection() {
             className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.18em] uppercase px-3 py-1.5 rounded-full mb-6"
             style={{ fontFamily: IBP, color: '#FACC15', border: '1px solid rgba(250,204,21,0.3)', background: 'rgba(250,204,21,0.07)' }}
           >
-            No credit card required
+            Free with your gym membership
           </span>
           <h2
             className="font-black text-white uppercase leading-[0.88] mb-6"
             style={{ fontFamily: BC, fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '-0.02em' }}
           >
-            READY TO BUILD YOUR <span style={{ color: '#FACC15' }}>ELITE GYM?</span>
+            READY TO TAKE YOUR <span style={{ color: '#FACC15' }}>TRAINING SERIOUSLY?</span>
           </h2>
-          <p className="text-lg mb-10 max-w-xl mx-auto" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}>
-            Join IronHub today. Setup takes 5 minutes. Results are permanent.
+          <p className="text-lg mb-10 max-w-xl mx-auto" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}>
+            Join your gym on IronHub. Check in, follow your plan, track your progress — and never skip a session again.
           </p>
           <Magnet strength={0.35}>
             <motion.div whileTap={{ scale: 0.97 }} className="inline-block">
@@ -60,7 +60,7 @@ export default function CTASection() {
             </motion.div>
           </Magnet>
           <p className="text-sm mt-6" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.45)' }}>
-            14-day trial · No credit card · Cancel anytime
+            Free plan · No credit card · Upgrade anytime
           </p>
         </motion.div>
       </div>

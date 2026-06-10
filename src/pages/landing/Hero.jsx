@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { ArrowRight, ChevronDown, Zap } from 'lucide-react'
 import Aurora       from '../../components/bits/Aurora'
 import BlurText     from '../../components/bits/BlurText'
-import ShinyText    from '../../components/bits/ShinyText'
 import CountUp      from '../../components/bits/CountUp'
 import Threads      from '../../components/bits/Threads'
 import GlitchText   from '../../components/bits/GlitchText'
@@ -12,25 +11,31 @@ import TiltCard     from '../../components/bits/TiltCard'
 import Magnet       from '../../components/bits/Magnet'
 import { BC, INT, IBP, V, BG, BDR, CRD } from './constants'
 
-const LIVE_FEED = [
-  { name: 'A. Rahman',  event: 'CHECK_IN', t: '00:02' },
-  { name: 'M. Santos',  event: 'CHECK_IN', t: '00:05' },
-  { name: 'J. Kim',     event: 'RENEWAL',  t: '00:11' },
-  { name: 'P. Torres',  event: 'CHECK_IN', t: '00:23' },
+const TODAY_WORKOUT = [
+  { name: 'Bench Press',     sets: '4 × 10', done: true  },
+  { name: 'Shoulder Press',  sets: '3 × 12', done: true  },
+  { name: 'Tricep Dips',     sets: '3 × 15', done: false },
+  { name: 'Cable Fly',       sets: '3 × 12', done: false },
 ]
-const BAR_H = [38, 54, 47, 73, 62, 90, 75]
 
-function TerminalDisplay() {
+const RECENT_CHECKINS = [
+  { day: 'Today',     time: '09:14 AM' },
+  { day: 'Yesterday', time: '08:52 AM' },
+  { day: 'Monday',    time: '09:30 AM' },
+]
+
+function MemberCard() {
   return (
     <div
       className="w-full max-w-sm rounded-xl overflow-hidden select-none"
       style={{
-        background:  CRD,
-        border:      `1px solid ${BDR}`,
-        borderTop:   '2px solid #FACC15',
-        boxShadow:   '0 0 60px rgba(250,204,21,0.12), 0 40px 80px rgba(0,0,0,0.4)',
+        background: CRD,
+        border:     `1px solid ${BDR}`,
+        borderTop:  '2px solid #FACC15',
+        boxShadow:  '0 0 60px rgba(250,204,21,0.12), 0 40px 80px rgba(0,0,0,0.4)',
       }}
     >
+      {/* Header */}
       <div
         className="flex items-center justify-between px-5 py-3"
         style={{ borderBottom: `1px solid ${BDR}`, background: 'rgba(250,204,21,0.03)' }}
@@ -44,19 +49,20 @@ function TerminalDisplay() {
             aria-hidden="true"
           />
           <span className="text-xs tracking-[0.16em]" style={{ fontFamily: IBP, color: '#FACC15' }}>
-            IRONHUB LIVE
+            MY DASHBOARD
           </span>
         </div>
         <span className="text-[10px] tracking-wider" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.35)' }}>
-          v2.4.1
+          IronHub
         </span>
       </div>
 
+      {/* Streak / Workouts / Attendance */}
       <div className="grid grid-cols-3" style={{ borderBottom: `1px solid ${BDR}` }}>
         {[
-          { val: '247',   label: 'CHECK-INS', c: '#FACC15' },
-          { val: '$3.4K', label: 'MRR',       c: '#FACC15' },
-          { val: '98%',   label: 'RETENTION', c: '#34D399' },
+          { val: '14',  label: 'DAY STREAK', c: '#FACC15' },
+          { val: '47',  label: 'WORKOUTS',   c: '#FACC15' },
+          { val: '91%', label: 'ATTENDANCE', c: '#34D399' },
         ].map(({ val, label, c }, i) => (
           <div
             key={label}
@@ -71,55 +77,47 @@ function TerminalDisplay() {
         ))}
       </div>
 
+      {/* Today's workout */}
       <div className="px-5 py-4" style={{ borderBottom: `1px solid ${BDR}` }}>
         <div className="text-[9px] tracking-[0.2em] mb-3 uppercase" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
-          WEEKLY LOAD
+          TODAY — PUSH DAY
         </div>
-        <div className="flex items-end gap-1 h-10">
-          {BAR_H.map((h, i) => (
-            <motion.div
-              key={i}
-              className="flex-1 rounded-sm"
-              style={{
-                background:    i === 5 ? '#FACC15' : 'rgba(250,204,21,0.18)',
-                height:        `${h}%`,
-                transformOrigin: 'bottom',
-              }}
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ delay: 0.6 + i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            />
-          ))}
-        </div>
-        <div className="flex mt-1.5">
-          {['M','T','W','T','F','S','S'].map((d, i) => (
-            <span key={i} className="flex-1 text-center text-[8px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{d}</span>
-          ))}
-        </div>
-      </div>
-
-      <div className="px-5 py-4">
-        <div className="text-[9px] tracking-[0.2em] uppercase mb-3" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
-          LIVE ACTIVITY
-        </div>
-        {LIVE_FEED.map(({ name, event, t }) => (
-          <div
-            key={name}
-            className="flex items-center gap-3 py-2"
-            style={{ borderBottom: `1px solid rgba(249,250,251,0.04)` }}
-          >
+        {TODAY_WORKOUT.map(({ name, sets, done }) => (
+          <div key={name} className="flex items-center gap-2.5 py-1.5">
             <span
-              className="w-0.5 h-4 flex-shrink-0"
-              style={{ background: event === 'RENEWAL' ? '#FACC15' : '#34D399' }}
+              className="w-3.5 h-3.5 rounded-sm flex-shrink-0 flex items-center justify-center"
+              style={{
+                background: done ? '#FACC15' : 'transparent',
+                border:     done ? 'none' : '1px solid rgba(249,250,251,0.2)',
+              }}
               aria-hidden="true"
-            />
-            <span className="text-xs flex-1" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.7)' }}>
+            >
+              {done && <span style={{ fontSize: '8px', color: '#0A0A0A', fontWeight: 700 }}>✓</span>}
+            </span>
+            <span className="text-xs flex-1" style={{ fontFamily: IBP, color: done ? 'rgba(249,250,251,0.4)' : 'rgba(249,250,251,0.75)', textDecoration: done ? 'line-through' : 'none' }}>
               {name}
             </span>
-            <span className="text-[9px] tracking-wider" style={{ fontFamily: IBP, color: event === 'RENEWAL' ? '#FACC15' : 'rgba(52,211,153,0.85)' }}>
-              {event}
-            </span>
-            <span className="text-[9px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{t}</span>
+            <span className="text-[9px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{sets}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent check-ins */}
+      <div className="px-5 py-4">
+        <div className="text-[9px] tracking-[0.2em] uppercase mb-3" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
+          RECENT CHECK-INS
+        </div>
+        {RECENT_CHECKINS.map(({ day, time }) => (
+          <div
+            key={day}
+            className="flex items-center justify-between py-1.5"
+            style={{ borderBottom: `1px solid rgba(249,250,251,0.04)` }}
+          >
+            <span className="text-xs" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.7)' }}>{day}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{time}</span>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#34D399' }} aria-hidden="true" />
+            </div>
           </div>
         ))}
       </div>
@@ -145,6 +143,7 @@ export default function Hero() {
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 w-full py-20">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <div>
+            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -163,7 +162,7 @@ export default function Hero() {
               >
                 <Zap className="w-3 h-3 fill-current flex-shrink-0" aria-hidden="true" />
                 <RotatingText
-                  texts={['QR Attendance', 'Subscription Plans', 'Workout Routines', 'Live Analytics']}
+                  texts={['QR Check-In', 'Daily Workouts', 'Track Progress', 'Build Streaks']}
                   rotationInterval={2400}
                   splitBy="characters"
                   staggerDuration={0.022}
@@ -173,9 +172,10 @@ export default function Hero() {
               </span>
             </motion.div>
 
+            {/* Headline */}
             <div className="mb-4">
               <BlurText
-                text="MANAGE YOUR GYM."
+                text="YOUR GYM."
                 delay={100}
                 animateBy="words"
                 direction="top"
@@ -197,10 +197,11 @@ export default function Hero() {
                   display:       'block',
                 }}
               >
-                DOMINATE YOUR MARKET.
+                YOUR PROGRESS.
               </GlitchText>
             </div>
 
+            {/* Sub-label */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -209,7 +210,7 @@ export default function Hero() {
             >
               <span className="w-5 h-px" style={{ background: 'rgba(250,204,21,0.4)' }} aria-hidden="true" />
               <RotatingText
-                texts={['TRACK ATTENDANCE', 'GROW REVENUE', 'RETAIN MEMBERS', 'CRUSH GOALS']}
+                texts={['SCAN & CHECK IN', 'FOLLOW YOUR ROUTINE', 'TRACK YOUR STREAK', 'LOG YOUR STATS']}
                 rotationInterval={2200}
                 splitBy="characters"
                 staggerDuration={0.025}
@@ -223,10 +224,10 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.65 }}
               className="text-lg leading-relaxed max-w-lg mb-8"
-              style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}
+              style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}
             >
-              IronHub gives gym owners precision tools for attendance,
-              subscriptions, and workout management — built for serious operators.
+              IronHub keeps your gym life organised. Check in with a scan,
+              follow your workout plan, and see your progress — all in one place.
             </motion.p>
 
             <motion.div
@@ -242,13 +243,13 @@ export default function Hero() {
                     className="inline-flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm rounded-xl cursor-pointer"
                     style={{ fontFamily: INT, background: '#FACC15', color: '#0A0A0A', boxShadow: '0 0 36px rgba(250,204,21,0.4)' }}
                   >
-                    Start for Free <ArrowRight className="w-4 h-4" />
+                    Get Started Free <ArrowRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
               </Magnet>
               <a
-                href="#features"
-                onClick={(e) => { e.preventDefault(); document.querySelector('#features')?.scrollIntoView({ behavior: 'smooth' }) }}
+                href="#how-it-works"
+                onClick={(e) => { e.preventDefault(); document.querySelector('#how-it-works')?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 font-medium text-sm rounded-xl cursor-pointer transition-colors duration-200"
                 style={{ fontFamily: INT, color: 'rgba(249,250,251,0.7)', border: `1px solid rgba(249,250,251,0.15)` }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(250,204,21,0.4)'; e.currentTarget.style.color = '#fff' }}
@@ -265,9 +266,9 @@ export default function Hero() {
               className="flex flex-wrap gap-6"
             >
               {[
-                { val: 500,  suffix: '+',  label: 'Gyms' },
-                { val: 99.9, suffix: '%',  label: 'Uptime' },
-                { val: 4.9,  suffix: '',   label: 'Rating' },
+                { val: 2400,  suffix: '+', label: 'Members' },
+                { val: 4.9,   suffix: '',  label: 'Rating'  },
+                { val: 100,   suffix: '%', label: 'Free to join' },
               ].map(({ val, suffix, label }) => (
                 <div key={label} className="flex items-baseline gap-1.5">
                   <span className="text-base font-bold" style={{ fontFamily: IBP, color: '#FACC15' }}>
@@ -279,6 +280,7 @@ export default function Hero() {
             </motion.div>
           </div>
 
+          {/* Member card with tilt */}
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
@@ -292,7 +294,7 @@ export default function Hero() {
                 aria-hidden="true"
               />
               <TiltCard rotateAmplitude={8} scaleOnHover={1.03}>
-                <TerminalDisplay />
+                <MemberCard />
               </TiltCard>
             </div>
           </motion.div>

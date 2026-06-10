@@ -5,9 +5,9 @@ import SpotlightCard from '../../components/bits/SpotlightCard'
 import { BC, INT, IBP, SRF, CRD, BDR } from './constants'
 
 const TESTIMONIALS = [
-  { name: 'Marcus Thompson', role: 'Owner, Iron Temple Gym',    quote: 'IronHub cut my admin time by 70%. Renewals are automated, data is accurate, decisions are faster.', stars: 5 },
-  { name: 'Sarah Malik',     role: 'Manager, Peak Performance', quote: 'The QR check-in alone was worth switching. Members love it. I finally have real attendance data.',  stars: 5 },
-  { name: 'David Chen',      role: 'Founder, Elevate CrossFit', quote: 'Setup took 20 minutes. Dashboard is clean, routine assignment keeps members engaged.',               stars: 5 },
+  { name: 'Bilal Ahmed',  role: 'Member, Iron Temple Gym',       quote: 'I hit a 63-day streak last month. I never tracked my attendance before — now I actually feel bad skipping.', stars: 5 },
+  { name: 'Sana Malik',   role: 'Member, Peak Performance Gym',  quote: 'My trainer assigns the workout and I just open the app and follow it. No more wondering what to do next.',   stars: 5 },
+  { name: 'Omar Farooq',  role: 'Member, FitZone Lahore',        quote: 'Seeing my weight and measurements go down on the charts is the only motivation I need to keep coming.',       stars: 5 },
 ]
 
 export default function Testimonials() {
@@ -26,7 +26,7 @@ export default function Testimonials() {
             encryptedClassName="opacity-30"
           />
           <h2 className="font-black text-white uppercase leading-[0.9]" style={{ fontFamily: BC, fontSize: 'clamp(2.8rem, 6vw, 5rem)', letterSpacing: '-0.02em' }}>
-            REAL OWNERS. <span style={{ color: '#FACC15' }}>REAL RESULTS.</span>
+            REAL MEMBERS. <span style={{ color: '#FACC15' }}>REAL RESULTS.</span>
           </h2>
         </div>
 
@@ -44,12 +44,12 @@ export default function Testimonials() {
                       <Star key={j} className="w-3.5 h-3.5" style={{ fill: '#FACC15', color: '#FACC15' }} aria-hidden="true" />
                     ))}
                   </div>
-                  <p className="text-base leading-relaxed mb-7" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.75)', fontStyle: 'italic' }}>
+                  <p className="text-base font-medium leading-relaxed mb-7" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.88)', fontStyle: 'italic' }}>
                     "{quote}"
                   </p>
                   <div style={{ borderTop: `1px solid ${BDR}` }} className="pt-5">
-                    <div className="font-black text-white text-sm uppercase" style={{ fontFamily: BC }}>{name}</div>
-                    <div className="text-xs mt-0.5" style={{ fontFamily: IBP, color: 'rgba(250,204,21,0.65)' }}>{role}</div>
+                    <div className="font-bold text-white text-sm" style={{ fontFamily: INT }}>{name}</div>
+                    <div className="text-xs font-medium mt-0.5" style={{ fontFamily: INT, color: 'rgba(250,204,21,0.85)' }}>{role}</div>
                   </div>
                 </SpotlightCard>
               </TiltCard>

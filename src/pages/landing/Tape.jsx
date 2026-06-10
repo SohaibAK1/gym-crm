@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { IBP, BG, BDR } from './constants'
 
 const TAPE_ITEMS = [
-  'QR Attendance', 'Subscription Plans', 'Workout Routines', 'Member Profiles',
-  'Renewal Alerts', 'Progress Tracking', 'Live Dashboard', 'Revenue Analytics',
+  'QR Check-In', 'Daily Workouts', 'Attendance Streak', 'Body Stats',
+  'Progress Charts', 'Gym Announcements', 'Membership Status', 'Personal Profile',
 ]
 
 export default function Tape() {

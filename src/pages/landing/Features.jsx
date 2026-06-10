@@ -1,16 +1,16 @@
-import { QrCode, CreditCard, TrendingUp, Dumbbell, Users, Shield } from 'lucide-react'
+import { QrCode, CreditCard, TrendingUp, Dumbbell, Users, Activity } from 'lucide-react'
 import DecryptedText from '../../components/bits/DecryptedText'
 import TiltCard      from '../../components/bits/TiltCard'
 import SpotlightCard from '../../components/bits/SpotlightCard'
 import { BC, INT, IBP, BG, CRD, BDR } from './constants'
 
 const FEATURES = [
-  { icon: QrCode,     tag: 'ATTENDANCE',    title: 'QR Check-In',         desc: 'Members scan a QR code for instant attendance logging. Track daily check-ins and spot drop-offs before they become churn.',   metric: '1,240 check-ins today' },
-  { icon: CreditCard, tag: 'SUBSCRIPTIONS', title: 'Subscription Engine', desc: 'Monitor active plans, expiry dates, and payment history. Automated alerts fire before memberships lapse.',                   metric: '18 renewals this week' },
-  { icon: TrendingUp, tag: 'ANALYTICS',     title: 'Live Analytics',      desc: 'Revenue trends, peak hours, retention rates, and plan performance — surfaced in real time.',                                  metric: '+12% retention MoM'   },
-  { icon: Dumbbell,   tag: 'ROUTINES',      title: 'Workout Programs',    desc: '3 predefined programs with daily checklists and streak tracking. Assign to any member in one click.',                        metric: '3 programs ready'      },
-  { icon: Users,      tag: 'MEMBERS',       title: 'Member Hub',          desc: 'Full profiles with history, subscriptions, and assigned routines. Everything about a member, one place.',                    metric: 'Full profile view'     },
-  { icon: Shield,     tag: 'SECURITY',      title: 'Enterprise Security', desc: 'Row-level security via Supabase. 99.9% uptime, zero compromise. Your member data stays yours.',                              metric: '99.9% uptime SLA'      },
+  { icon: QrCode,     tag: 'CHECK-IN',      title: 'Scan & You\'re In',      desc: 'Walk up to the door, scan the QR code, and your attendance is logged instantly. No paper, no waiting, no hassle.',       metric: 'Takes under 3 seconds'    },
+  { icon: Dumbbell,   tag: 'WORKOUTS',      title: 'Your Daily Routine',     desc: 'Your trainer assigns your workout plan. Open the app each day and see exactly what to do — sets, reps, and all.',        metric: 'Assigned by your trainer'  },
+  { icon: TrendingUp, tag: 'PROGRESS',      title: 'See Yourself Improve',   desc: 'Log your weight, measurements, and body stats over time. Charts show you exactly how far you\'ve come.',                metric: 'Visual progress charts'    },
+  { icon: Activity,   tag: 'ATTENDANCE',    title: 'Track Your Streak',      desc: 'See your full check-in calendar and keep your streak alive. Missing a day hurts — which is kind of the point.',          metric: 'Day-by-day calendar'       },
+  { icon: CreditCard, tag: 'MEMBERSHIP',    title: 'Know Your Plan',         desc: 'See your active membership, what it includes, and when it expires. No surprises, no confusion.',                         metric: 'Always up to date'         },
+  { icon: Users,      tag: 'ANNOUNCEMENTS', title: 'Stay in the Loop',       desc: 'Get updates from your gym directly in the app — schedule changes, holiday hours, events, and more.',                     metric: 'From your gym, instantly'  },
 ]
 
 export default function Features() {
@@ -34,8 +34,8 @@ export default function Features() {
             className="font-black text-white uppercase leading-[0.9]"
             style={{ fontFamily: BC, fontSize: 'clamp(2.8rem, 6vw, 5rem)', letterSpacing: '-0.02em' }}
           >
-            EVERYTHING YOUR GYM NEEDS.{' '}
-            <span style={{ color: '#FACC15' }}>NOTHING IT DOESN'T.</span>
+            EVERYTHING YOU NEED.{' '}
+            <span style={{ color: '#FACC15' }}>ALL IN ONE PLACE.</span>
           </h2>
         </div>
 
@@ -55,13 +55,13 @@ export default function Features() {
                     {tag}
                   </div>
                   <Icon className="w-6 h-6 mb-4" style={{ color: '#FACC15' }} aria-hidden="true" />
-                  <h3 className="font-black text-white uppercase mb-2 text-lg" style={{ fontFamily: BC, letterSpacing: '-0.01em' }}>
+                  <h3 className="font-extrabold text-white mb-2 text-xl" style={{ fontFamily: INT }}>
                     {title}
                   </h3>
-                  <p className="text-sm leading-relaxed mb-6" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}>
+                  <p className="text-sm font-medium leading-relaxed mb-6" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}>
                     {desc}
                   </p>
-                  <div className="text-xs font-medium mt-auto" style={{ fontFamily: IBP, color: '#FACC15' }}>
+                  <div className="text-sm font-semibold mt-auto" style={{ fontFamily: INT, color: '#FACC15' }}>
                     {metric}
                   </div>
                 </SpotlightCard>

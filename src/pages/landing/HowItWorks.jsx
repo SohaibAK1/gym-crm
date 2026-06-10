@@ -1,4 +1,4 @@
-import { Users, CreditCard, TrendingUp } from 'lucide-react'
+import { Users, QrCode, TrendingUp } from 'lucide-react'
 import DecryptedText from '../../components/bits/DecryptedText'
 import TiltCard      from '../../components/bits/TiltCard'
 import SpotlightCard from '../../components/bits/SpotlightCard'
@@ -6,9 +6,9 @@ import TrueFocus     from '../../components/bits/TrueFocus'
 import { BC, INT, IBP, SRF, CRD, BDR } from './constants'
 
 const STEPS = [
-  { n: '01', icon: Users,       title: 'Add Your Members',        desc: 'Import or create member profiles with contact info and plan details in under a minute.' },
-  { n: '02', icon: CreditCard,  title: 'Assign Plans & Routines', desc: "Set subscription tiers and assign workout programs tailored to each member's goals." },
-  { n: '03', icon: TrendingUp,  title: 'Track Everything',        desc: 'Monitor attendance, upcoming renewals, and member progress from your real-time dashboard.' },
+  { n: '01', icon: Users,       title: 'Your Gym Adds You',    desc: 'Your gym creates your profile and assigns your membership plan. You get a login and you\'re ready to go.' },
+  { n: '02', icon: QrCode,      title: 'Check In & Train',     desc: 'Walk in, scan the QR code at the door, and follow your daily workout routine — everything is already set up for you.' },
+  { n: '03', icon: TrendingUp,  title: 'Watch Yourself Grow',  desc: 'Log your body stats, keep your check-in streak alive, and watch your progress build week by week.' },
 ]
 
 export default function HowItWorks() {
@@ -32,7 +32,7 @@ export default function HowItWorks() {
             style={{ fontFamily: BC, fontSize: 'clamp(2.8rem, 6vw, 5rem)', letterSpacing: '-0.02em' }}
           >
             <TrueFocus
-              sentence="UP AND RUNNING IN 3 STEPS."
+              sentence="SIMPLE. SCAN. TRAIN. IMPROVE."
               blurAmount={4}
               borderColor="#FACC15"
               glowColor="rgba(250,204,21,0.5)"
@@ -65,10 +65,10 @@ export default function HowItWorks() {
                     Step {n}
                   </span>
                   <Icon className="w-6 h-6 mb-4" style={{ color: '#FACC15' }} aria-hidden="true" />
-                  <h3 className="font-black text-white uppercase mb-3" style={{ fontFamily: BC, fontSize: '1.4rem', letterSpacing: '-0.01em' }}>
+                  <h3 className="font-extrabold text-white mb-3 text-xl" style={{ fontFamily: INT }}>
                     {title}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}>
+                  <p className="text-sm font-medium leading-relaxed" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}>
                     {desc}
                   </p>
                 </SpotlightCard>

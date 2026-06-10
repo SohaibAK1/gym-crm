@@ -6,8 +6,8 @@ import Magnet from '../../components/bits/Magnet'
 import { BC, INT, IBP, V, BDR, CRD } from './constants'
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing',  href: '#pricing'  },
+  { label: 'Features',     href: '#features'     },
+  { label: 'How It Works', href: '#how-it-works' },
 ]
 
 export default function Navbar() {
@@ -55,9 +55,9 @@ export default function Navbar() {
                 href={href}
                 onClick={(e) => anchor(e, href)}
                 className="text-sm font-medium transition-colors duration-200 cursor-pointer"
-                style={{ fontFamily: INT, color: 'rgba(249,250,251,0.55)' }}
+                style={{ fontFamily: INT, color: 'rgba(249,250,251,0.75)' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(249,250,251,0.55)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(249,250,251,0.75)'}
               >
                 {label}
               </a>
@@ -65,9 +65,9 @@ export default function Navbar() {
             <Link
               to="/login"
               className="text-sm font-medium transition-colors duration-200"
-              style={{ fontFamily: INT, color: 'rgba(249,250,251,0.55)' }}
+              style={{ fontFamily: INT, color: 'rgba(249,250,251,0.75)' }}
               onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(249,250,251,0.55)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(249,250,251,0.75)'}
             >
               Login
             </Link>
@@ -85,7 +85,7 @@ export default function Navbar() {
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="md:hidden p-2 cursor-pointer"
-            style={{ color: 'rgba(249,250,251,0.55)' }}
+            style={{ color: 'rgba(249,250,251,0.75)' }}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -109,7 +109,7 @@ export default function Navbar() {
                   href={href}
                   onClick={(e) => anchor(e, href)}
                   className="px-3 py-3 text-sm font-medium"
-                  style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}
+                  style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}
                 >
                   {label}
                 </a>
@@ -118,7 +118,7 @@ export default function Navbar() {
                 to="/login"
                 onClick={() => setMenuOpen(false)}
                 className="px-3 py-3 text-sm font-medium"
-                style={{ fontFamily: INT, color: 'rgba(249,250,251,0.65)' }}
+                style={{ fontFamily: INT, color: 'rgba(249,250,251,0.82)' }}
               >
                 Login
               </Link>
