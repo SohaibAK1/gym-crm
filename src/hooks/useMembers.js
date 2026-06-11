@@ -10,7 +10,7 @@ export function useMembers() {
         .from('profiles')
         .select(`
           id, full_name, phone, gender, date_of_birth,
-          goal, slot, is_active, created_at, can_create_routine,
+          goal, slot, is_active, created_at, can_create_routine, profile_picture_url,
           memberships!memberships_member_id_fkey (id, plan_type, amount, start_date, end_date, is_active)
         `)
         .eq('role', 'member')

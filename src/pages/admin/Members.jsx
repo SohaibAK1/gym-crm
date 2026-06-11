@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UserPlus, Search, X, ChevronRight } from 'lucide-react'
+import { UserPlus, Search, X, ChevronRight, Sun, Moon, Repeat2 } from 'lucide-react'
 import { useMembers, useCreateMember } from '../../hooks/useMembers'
 import { friendlyError } from '../../lib/errors'
 
@@ -29,13 +29,14 @@ function getActivePlan(memberships) {
 function SlotBadge({ slot }) {
   if (!slot) return <span style={{ color: 'rgba(249,250,251,0.3)', fontSize: 12, fontFamily: INT }}>—</span>
   const cfg = {
-    morning: { label: 'Morning', color: YLW,       bg: 'rgba(250,204,21,0.1)'  },
-    evening: { label: 'Evening', color: '#60A5FA', bg: 'rgba(96,165,250,0.1)'  },
-    both:    { label: 'Both',    color: '#34D399', bg: 'rgba(52,211,153,0.1)'  },
-  }[slot] ?? { label: slot, color: '#aaa', bg: 'rgba(170,170,170,0.1)' }
+    morning: { label: 'Morning', color: YLW,       bg: 'rgba(250,204,21,0.12)',  border: 'rgba(250,204,21,0.3)',  icon: <Sun  className="w-3 h-3 flex-shrink-0" /> },
+    evening: { label: 'Evening', color: '#60A5FA', bg: 'rgba(96,165,250,0.12)',  border: 'rgba(96,165,250,0.3)',  icon: <Moon className="w-3 h-3 flex-shrink-0" /> },
+    both:    { label: 'Both',    color: '#34D399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.3)',  icon: <Repeat2 className="w-3 h-3 flex-shrink-0" /> },
+  }[slot] ?? { label: slot, color: '#aaa', bg: 'rgba(170,170,170,0.1)', border: 'rgba(170,170,170,0.2)', icon: null }
   return (
-    <span className="text-xs font-medium px-2 py-0.5 rounded-full"
-      style={{ color: cfg.color, background: cfg.bg, fontFamily: INT }}>
+    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-lg w-fit"
+      style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, fontFamily: INT }}>
+      {cfg.icon}
       {cfg.label}
     </span>
   )
@@ -73,6 +74,66 @@ const inp = {
   style: { fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.15)' },
   onFocus: e => { e.target.style.borderColor = 'rgba(250,204,21,0.5)' },
   onBlur:  e => { e.target.style.borderColor = 'rgba(250,204,21,0.15)' },
+}
+
+function FilterSelect({ value, onChange, options }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const active    = value !== options[0].value
+  const label     = options.find(o => o.value === value)?.label ?? options[0].label
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors"
+        style={{
+          fontFamily: INT,
+          background: active ? 'rgba(250,204,21,0.1)' : CRD,
+          color:      active ? YLW : 'rgba(249,250,251,0.55)',
+          border:     active ? '1px solid rgba(250,204,21,0.3)' : `1px solid ${BRD}`,
+        }}
+      >
+        {label}
+        <ChevronRight className="w-3.5 h-3.5 transition-transform" style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0,  scale: 1     }}
+            exit={{    opacity: 0, y: -4, scale: 0.97  }}
+            transition={{ duration: 0.12 }}
+            className="absolute top-full mt-1.5 left-0 z-50 rounded-xl overflow-hidden min-w-[140px]"
+            style={{ background: '#2A2722', border: `1px solid rgba(250,204,21,0.15)`, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+          >
+            {options.map(o => (
+              <button
+                key={o.value}
+                onClick={() => { onChange(o.value); setOpen(false) }}
+                className="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]"
+                style={{
+                  fontFamily: INT,
+                  color: o.value === value ? YLW : 'rgba(249,250,251,0.75)',
+                  fontWeight: o.value === value ? 600 : 400,
+                }}
+              >
+                {o.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 function AddMemberModal({ open, onClose }) {
@@ -185,16 +246,34 @@ function AddMemberModal({ open, onClose }) {
 
 export default function AdminMembers() {
   const { data: members = [], isLoading, error: membersError } = useMembers()
-  const [search, setSearch]   = useState('')
-  const [filter, setFilter]   = useState('all')
-  const [showModal, setShowModal] = useState(false)
+  const [search,       setSearch]       = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [slotFilter,   setSlotFilter]   = useState('all')
+  const [planFilter,   setPlanFilter]   = useState('all')
+  const [showModal,    setShowModal]    = useState(false)
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return members
-      .filter(m => filter === 'all' ? true : filter === 'active' ? m.is_active : !m.is_active)
+      .filter(m => {
+        if (statusFilter === 'active')   return m.is_active
+        if (statusFilter === 'inactive') return !m.is_active
+        return true
+      })
+      .filter(m => slotFilter === 'all' || m.slot === slotFilter)
+      .filter(m => {
+        const plan     = getActivePlan(m.memberships)
+        const daysLeft = plan ? Math.ceil((new Date(plan.end_date) - new Date()) / 86400000) : null
+        if (planFilter === 'active')   return !!plan
+        if (planFilter === 'expiring') return !!plan && daysLeft <= 7
+        if (planFilter === 'none')     return !plan
+        return true
+      })
       .filter(m => !q || m.full_name?.toLowerCase().includes(q) || m.phone?.includes(q))
-  }, [members, search, filter])
+  }, [members, search, statusFilter, slotFilter, planFilter])
+
+  const hasActiveFilters = statusFilter !== 'all' || slotFilter !== 'all' || planFilter !== 'all' || search
+  const clearAll = () => { setSearch(''); setStatusFilter('all'); setSlotFilter('all'); setPlanFilter('all') }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -215,8 +294,8 @@ export default function AdminMembers() {
         </button>
       </div>
 
-      {/* Search + Filter */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+      {/* Search + Status filter */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
             style={{ color: 'rgba(249,250,251,0.3)' }} />
@@ -227,18 +306,56 @@ export default function AdminMembers() {
         </div>
         <div className="flex gap-2">
           {[['all', 'All'], ['active', 'Active'], ['inactive', 'Inactive']].map(([v, l]) => (
-            <button key={v} onClick={() => setFilter(v)}
+            <button key={v} onClick={() => setStatusFilter(v)}
               className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
               style={{
                 fontFamily: INT,
-                background: filter === v ? YLW : CRD,
-                color:      filter === v ? '#0A0A0A' : 'rgba(249,250,251,0.55)',
-                border:     filter === v ? 'none' : `1px solid ${BRD}`,
+                background: statusFilter === v ? YLW : CRD,
+                color:      statusFilter === v ? '#0A0A0A' : 'rgba(249,250,251,0.55)',
+                border:     statusFilter === v ? 'none' : `1px solid ${BRD}`,
               }}>
               {l}
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Slot + Plan filters */}
+      <div className="flex items-center gap-2 mb-5 flex-wrap">
+        <FilterSelect
+          value={slotFilter}
+          onChange={setSlotFilter}
+          options={[
+            { value: 'all',     label: 'All Slots' },
+            { value: 'morning', label: 'Morning'   },
+            { value: 'evening', label: 'Evening'   },
+            { value: 'both',    label: 'Both'      },
+          ]}
+        />
+        <FilterSelect
+          value={planFilter}
+          onChange={setPlanFilter}
+          options={[
+            { value: 'all',      label: 'All Plans'     },
+            { value: 'active',   label: 'Active Plan'   },
+            { value: 'expiring', label: 'Expiring Soon' },
+            { value: 'none',     label: 'No Plan'       },
+          ]}
+        />
+
+        {/* Clear all */}
+        {hasActiveFilters && (
+          <button onClick={clearAll}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-opacity hover:opacity-70"
+            style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)', border: `1px solid ${BRD}` }}>
+            <X className="w-3.5 h-3.5" /> Clear
+          </button>
+        )}
+
+        {/* Result count */}
+        <span className="ml-auto text-xs" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.3)' }}>
+          {filtered.length} of {members.length}
+        </span>
       </div>
 
       {membersError && (
@@ -279,9 +396,12 @@ export default function AdminMembers() {
                 style={{ gridTemplateColumns: '2.2fr 1fr 1.2fr 1.5fr 1fr', borderBottom: i < filtered.length - 1 ? `1px solid ${BRD}` : 'none' }}>
                 {/* Name */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold flex-shrink-0"
                     style={{ background: m.is_active ? YLW : 'rgba(249,250,251,0.08)', color: m.is_active ? '#0A0A0A' : 'rgba(249,250,251,0.4)', fontFamily: INT }}>
-                    {m.full_name?.[0]?.toUpperCase() ?? '?'}
+                    {m.profile_picture_url
+                      ? <img src={m.profile_picture_url} alt="" className="w-full h-full object-cover" />
+                      : (m.full_name?.[0]?.toUpperCase() ?? '?')
+                    }
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate" style={{ fontFamily: INT }}>
@@ -309,9 +429,12 @@ export default function AdminMembers() {
                 className="md:hidden flex items-center justify-between px-4 py-4 transition-colors hover:bg-white/[0.025]"
                 style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${BRD}` : 'none' }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold flex-shrink-0"
                     style={{ background: m.is_active ? YLW : 'rgba(249,250,251,0.08)', color: m.is_active ? '#0A0A0A' : 'rgba(249,250,251,0.4)', fontFamily: INT }}>
-                    {m.full_name?.[0]?.toUpperCase() ?? '?'}
+                    {m.profile_picture_url
+                      ? <img src={m.profile_picture_url} alt="" className="w-full h-full object-cover" />
+                      : (m.full_name?.[0]?.toUpperCase() ?? '?')
+                    }
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white" style={{ fontFamily: INT }}>{m.full_name ?? 'Unnamed'}</p>

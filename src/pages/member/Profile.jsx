@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pencil, Save, Loader, LogOut, ChevronRight, X, Check, KeyRound } from 'lucide-react'
+import { Pencil, Save, Loader, LogOut, ChevronRight, X, Check, KeyRound, Camera } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
-import { useMemberSubscription, useUpdateMemberProfile } from '../../hooks/useMemberData'
+import { useMemberSubscription, useUpdateMemberProfile, useUploadAvatar } from '../../hooks/useMemberData'
 import { friendlyError } from '../../lib/errors'
 
 const BC  = "'Barlow Condensed', sans-serif"
@@ -166,11 +166,13 @@ function ChangePasswordSection({ userEmail }) {
 }
 
 export default function MemberProfile() {
-  const { profile, user } = useAuth()
+  const { profile, user, refreshProfile } = useAuth()
   const navigate     = useNavigate()
   const [editing, setEditing]     = useState(false)
   const [saved,   setSaved]       = useState(false)
   const [logoutConfirm, setLogoutConfirm] = useState(false)
+  const [photoError, setPhotoError] = useState(null)
+  const photoInputRef = useRef(null)
 
   const [form, setForm] = useState({
     full_name:    '',
@@ -182,6 +184,7 @@ export default function MemberProfile() {
 
   const { data: memberships = [] } = useMemberSubscription()
   const { mutate: updateProfile, isPending, error: saveError } = useUpdateMemberProfile()
+  const { mutate: uploadAvatar, isPending: uploading } = useUploadAvatar()
 
   useEffect(() => {
     if (profile) {
@@ -207,6 +210,25 @@ export default function MemberProfile() {
     })
   }
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setPhotoError('Only JPG, PNG, or WebP images allowed.')
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setPhotoError('Image must be under 2 MB.')
+      return
+    }
+    setPhotoError(null)
+    uploadAvatar(file, {
+      onSuccess: () => refreshProfile(),
+      onError: (err) => setPhotoError(friendlyError(err)),
+    })
+  }
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     navigate('/login')
@@ -227,21 +249,57 @@ export default function MemberProfile() {
         style={{ background: 'linear-gradient(180deg, #1E1C18 0%, #0A0A0A 100%)' }}
       >
         {/* Avatar */}
-        <div
-          className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black mb-4 relative"
-          style={{ background: YLW, color: '#0A0A0A', fontFamily: BC }}
-        >
-          {initials}
-          {saved && (
-            <motion.div
-              initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ background: '#34D399' }}
+        <div className="relative mb-4">
+          <div
+            className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center text-3xl font-black"
+            style={{ background: YLW, color: '#0A0A0A', fontFamily: BC }}
+          >
+            {profile?.profile_picture_url
+              ? <img src={profile.profile_picture_url} alt="avatar" className="w-full h-full object-cover" />
+              : initials
+            }
+          </div>
+
+          <AnimatePresence>
+            {saved && (
+              <motion.div
+                initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                style={{ background: '#34D399' }}
+              >
+                <Check className="w-3.5 h-3.5 text-white" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!saved && (
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
+              style={{ background: '#2A2A2A', border: '2px solid #0A0A0A' }}
             >
-              <Check className="w-3.5 h-3.5 text-white" />
-            </motion.div>
+              {uploading
+                ? <span className="w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                : <Camera className="w-3 h-3" style={{ color: YLW }} />
+              }
+            </button>
           )}
+
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
         </div>
+
+        {photoError && (
+          <p className="text-xs mb-2 text-center" style={{ fontFamily: INT, color: '#F87171' }}>
+            {photoError}
+          </p>
+        )}
 
         {/* Name */}
         <h1 className="text-2xl font-black text-white mb-2 text-center" style={{ fontFamily: BC }}>

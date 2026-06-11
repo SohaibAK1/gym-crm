@@ -48,8 +48,12 @@ export function AuthProvider({ children }) {
 
   const role = profile?.role ?? null
 
+  const refreshProfile = () => {
+    if (user) fetchProfile(user.id).catch(console.error)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, role, loading, profileReady }}>
+    <AuthContext.Provider value={{ user, profile, role, loading, profileReady, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

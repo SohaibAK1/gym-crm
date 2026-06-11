@@ -165,6 +165,42 @@ export function useLogBodyStats() {
   })
 }
 
+// ── Upload avatar photo ───────────────────────────────────────────
+function resizeToBase64(file, maxPx = 200) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(maxPx / img.width, maxPx / img.height, 1)
+      const canvas = document.createElement('canvas')
+      canvas.width  = Math.round(img.width  * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.onerror = reject
+    img.src = url
+  })
+}
+
+export function useUploadAvatar() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (file) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      const dataUrl = await resizeToBase64(file)
+      const { error } = await supabase
+        .from('profiles')
+        .update({ profile_picture_url: dataUrl })
+        .eq('id', user.id)
+      if (error) throw error
+      return dataUrl
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['member-profile'] }),
+  })
+}
+
 // ── Update own profile ────────────────────────────────────────────
 export function useUpdateMemberProfile() {
   const queryClient = useQueryClient()

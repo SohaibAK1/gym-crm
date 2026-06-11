@@ -191,9 +191,12 @@ export default function AdminMemberDetail() {
 
       {/* ── Profile header ── */}
       <div className="flex items-center gap-5 mb-6">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black flex-shrink-0"
+        <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center text-2xl font-black flex-shrink-0"
           style={{ background: YLW, color: '#0A0A0A', fontFamily: BC }}>
-          {member.full_name?.[0]?.toUpperCase() ?? '?'}
+          {member.profile_picture_url
+            ? <img src={member.profile_picture_url} alt="" className="w-full h-full object-cover" />
+            : (member.full_name?.[0]?.toUpperCase() ?? '?')
+          }
         </div>
         <div>
           <h1 className="text-3xl font-black text-white mb-0.5" style={{ fontFamily: BC }}>
