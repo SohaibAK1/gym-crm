@@ -20,7 +20,7 @@ const Footer            = lazy(() => import('./landing/Footer'))
 export default function Landing() {
   useReveal()
   return (
-    <div className="min-h-screen antialiased overflow-x-hidden" style={{ background: BG }}>
+    <div className="min-h-screen antialiased overflow-x-clip" style={{ background: BG }}>
       <CustomCursor />
       <Navbar />
       <main>

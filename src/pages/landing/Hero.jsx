@@ -127,7 +127,7 @@ function MemberCard() {
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden" style={{ background: BG }}>
+    <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: BG }}>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ opacity: 0.28 }}>
         <Threads color={[0.98, 0.8, 0.08]} amplitude={1.5} distance={0} enableMouseInteraction={false} />
       </div>
