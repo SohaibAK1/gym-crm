@@ -9,13 +9,13 @@ import Hero   from './landing/Hero'
 import Tape   from './landing/Tape'
 
 // Below-fold: lazy-loaded after hero renders
-const Stats        = lazy(() => import('./landing/Stats'))
-const Features     = lazy(() => import('./landing/Features'))
-const HowItWorks   = lazy(() => import('./landing/HowItWorks'))
-const Pricing      = lazy(() => import('./landing/Pricing'))
-const Testimonials = lazy(() => import('./landing/Testimonials'))
-const CTASection   = lazy(() => import('./landing/CTASection'))
-const Footer       = lazy(() => import('./landing/Footer'))
+const Stats             = lazy(() => import('./landing/Stats'))
+const Features          = lazy(() => import('./landing/Features'))
+const HowItWorks        = lazy(() => import('./landing/HowItWorks'))
+const Pricing           = lazy(() => import('./landing/Pricing'))
+const Testimonials      = lazy(() => import('./landing/Testimonials'))
+const CTASection        = lazy(() => import('./landing/CTASection'))
+const Footer            = lazy(() => import('./landing/Footer'))
 
 export default function Landing() {
   useReveal()
@@ -31,7 +31,7 @@ export default function Landing() {
           <Features />
           <HowItWorks />
           <Pricing />
-          <Testimonials />
+<Testimonials />
           <CTASection />
         </Suspense>
       </main>
