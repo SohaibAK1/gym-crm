@@ -50,6 +50,27 @@ Deno.serve(async (req) => {
     })
   }
 
+  // ── Service-role client ──────────────────────────────────────────
+  const adminClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  // ── Rate limit: max 10 new members per hour ──────────────────────
+  const oneHourAgo = new Date(Date.now() - 3_600_000).toISOString()
+  const { count, error: countError } = await adminClient
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('role', 'member')
+    .gte('created_at', oneHourAgo)
+
+  if (!countError && count !== null && count >= 10) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit: max 10 new members per hour. Try again later.' }),
+      { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   // ── Parse request body ───────────────────────────────────────────
   let body: {
     email: string
@@ -77,10 +98,6 @@ Deno.serve(async (req) => {
   }
 
   // ── Create the auth user with service-role key ───────────────────
-  const adminClient = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
 
   const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
     email,

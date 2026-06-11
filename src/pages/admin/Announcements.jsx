@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Megaphone, PlusCircle, X, Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
 import { useAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../../hooks/useAnnouncements'
+import { friendlyError } from '../../lib/errors'
 
 const BC  = "'Barlow Condensed', sans-serif"
 const INT = 'Inter, system-ui, sans-serif'
@@ -91,15 +92,16 @@ function PostModal({ open, editing, onClose }) {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Field label="Title" required>
-                    <input value={form.title} onChange={set('title')} required placeholder="e.g. Gym closed on Sunday" {...inputBase} />
+                    <input value={form.title} onChange={set('title')} required placeholder="e.g. Gym closed on Sunday" maxLength={200} {...inputBase} />
                   </Field>
                   <Field label="Message">
                     <textarea value={form.body} onChange={set('body')} rows={4}
                       placeholder="Optional details…"
+                      maxLength={2000}
                       {...inputBase}
                       className="w-full px-4 py-2.5 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors resize-none" />
                   </Field>
-                  {error && <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{error.message}</p>}
+                  {error && <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{friendlyError(error)}</p>}
                   <button type="submit" disabled={isPending}
                     className="w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
                     style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>

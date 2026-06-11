@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UserPlus, Search, X, ChevronRight } from 'lucide-react'
 import { useMembers, useCreateMember } from '../../hooks/useMembers'
+import { friendlyError } from '../../lib/errors'
 
 const BC  = "'Barlow Condensed', sans-serif"
 const INT = 'Inter, system-ui, sans-serif'
@@ -125,16 +126,16 @@ function AddMemberModal({ open, onClose }) {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Field label="Full Name" required>
-                    <input value={form.full_name} onChange={set('full_name')} required placeholder="Rahul Sharma" {...inp} />
+                    <input value={form.full_name} onChange={set('full_name')} required placeholder="Rahul Sharma" maxLength={100} {...inp} />
                   </Field>
                   <Field label="Email" required>
-                    <input type="email" value={form.email} onChange={set('email')} required placeholder="rahul@gmail.com" {...inp} />
+                    <input type="email" value={form.email} onChange={set('email')} required placeholder="rahul@gmail.com" maxLength={254} {...inp} />
                   </Field>
                   <Field label="Temp Password" required>
                     <input type="password" value={form.password} onChange={set('password')} required placeholder="Min 6 characters" {...inp} />
                   </Field>
                   <Field label="Phone">
-                    <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 98765 43210" {...inp} />
+                    <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 98765 43210" maxLength={20} {...inp} />
                   </Field>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Goal">
@@ -162,7 +163,7 @@ function AddMemberModal({ open, onClose }) {
                   </div>
 
                   {error && (
-                    <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{error.message}</p>
+                    <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{friendlyError(error)}</p>
                   )}
 
                   <button type="submit" disabled={isPending}
@@ -242,7 +243,7 @@ export default function AdminMembers() {
 
       {membersError && (
         <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171', fontFamily: INT }}>
-          Query error: {membersError.message}
+          {friendlyError(membersError)}
         </div>
       )}
 

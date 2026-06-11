@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlusCircle, X, TrendingUp, Loader } from 'lucide-react'
 import { useBodyStats, useLogBodyStats } from '../../hooks/useMemberData'
+import { friendlyError } from '../../lib/errors'
 
 const BC  = "'Barlow Condensed', sans-serif"
 const INT = 'Inter, system-ui, sans-serif'
@@ -79,6 +80,14 @@ const inp = {
 }
 
 function LogForm({ onClose }) {
+  const STAT_FIELDS = [
+    { k: 'weight_kg',    label: 'Weight (kg)',  type: 'number', min: 0, max: 500  },
+    { k: 'chest_cm',     label: 'Chest (cm)',   type: 'number', min: 0, max: 300  },
+    { k: 'waist_cm',     label: 'Waist (cm)',   type: 'number', min: 0, max: 300  },
+    { k: 'bicep_cm',     label: 'Bicep (cm)',   type: 'number', min: 0, max: 100  },
+    { k: 'body_fat_pct', label: 'Body Fat (%)', type: 'number', min: 0, max: 100  },
+    { k: 'hips_cm',      label: 'Hips (cm)',    type: 'number', min: 0, max: 300  },
+  ]
   const blank = { logged_at: new Date().toISOString().split('T')[0], weight_kg: '', height_cm: '', chest_cm: '', waist_cm: '', hips_cm: '', bicep_cm: '', body_fat_pct: '', notes: '' }
   const [form, setForm]   = useState(blank)
   const [done, setDone]   = useState(false)
@@ -106,32 +115,18 @@ function LogForm({ onClose }) {
           <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Date</p>
           <input type="date" value={form.logged_at} onChange={set('logged_at')} {...inp} />
         </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Weight (kg)</p>
-          <input type="number" step="0.1" value={form.weight_kg} onChange={set('weight_kg')} placeholder="72.5" {...inp} />
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Chest (cm)</p>
-          <input type="number" step="0.1" value={form.chest_cm} onChange={set('chest_cm')} placeholder="95" {...inp} />
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Waist (cm)</p>
-          <input type="number" step="0.1" value={form.waist_cm} onChange={set('waist_cm')} placeholder="80" {...inp} />
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Bicep (cm)</p>
-          <input type="number" step="0.1" value={form.bicep_cm} onChange={set('bicep_cm')} placeholder="35" {...inp} />
-        </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Body Fat (%)</p>
-          <input type="number" step="0.1" value={form.body_fat_pct} onChange={set('body_fat_pct')} placeholder="18" {...inp} />
-        </div>
+        {STAT_FIELDS.map(({ k, label, min, max }) => (
+          <div key={k}>
+            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>{label}</p>
+            <input type="number" step="0.1" min={min} max={max} value={form[k]} onChange={set(k)} {...inp} />
+          </div>
+        ))}
       </div>
       <div>
         <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.45)' }}>Notes</p>
-        <input value={form.notes} onChange={set('notes')} placeholder="Optional note" {...inp} />
+        <input value={form.notes} onChange={set('notes')} placeholder="Optional note" maxLength={500} {...inp} />
       </div>
-      {error && <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{error.message}</p>}
+      {error && <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{friendlyError(error)}</p>}
       <button type="submit" disabled={isPending}
         className="w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
         style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>

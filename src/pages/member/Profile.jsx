@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pencil, Save, Loader, LogOut, ChevronRight, X, Check } from 'lucide-react'
+import { Pencil, Save, Loader, LogOut, ChevronRight, X, Check, KeyRound } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import { useMemberSubscription, useUpdateMemberProfile } from '../../hooks/useMemberData'
+import { friendlyError } from '../../lib/errors'
 
 const BC  = "'Barlow Condensed', sans-serif"
 const INT = 'Inter, system-ui, sans-serif'
@@ -59,8 +60,113 @@ const selStyle = {
   onBlur:  e => { e.target.style.borderColor = 'rgba(250,204,21,0.18)' },
 }
 
+function ChangePasswordSection({ userEmail }) {
+  const [open,    setOpen]    = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [status,  setStatus]  = useState(null)
+  const [form,    setForm]    = useState({ current: '', next: '', confirm: '' })
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus(null)
+    if (form.next.length < 8)          { setStatus('New password must be at least 8 characters.'); return }
+    if (form.next !== form.confirm)     { setStatus('New passwords do not match.'); return }
+    if (form.next === form.current)     { setStatus('New password must differ from the current one.'); return }
+
+    setLoading(true)
+    const { error: verifyErr } = await supabase.auth.signInWithPassword({ email: userEmail, password: form.current })
+    if (verifyErr) { setStatus('Current password is incorrect.'); setLoading(false); return }
+
+    const { error: updateErr } = await supabase.auth.updateUser({ password: form.next })
+    if (updateErr) {
+      setStatus(friendlyError(updateErr))
+    } else {
+      setStatus('success')
+      setForm({ current: '', next: '', confirm: '' })
+      setOpen(false)
+      setTimeout(() => setStatus(null), 4000)
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: CRD, border: `1px solid ${BRD}` }}>
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-3.5 h-3.5" style={{ color: 'rgba(249,250,251,0.4)' }} />
+          <p className="text-xs font-semibold uppercase tracking-wider"
+            style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>Password</p>
+        </div>
+        <button onClick={() => { setOpen(v => !v); setStatus(null) }}
+          className="text-xs font-semibold transition-opacity hover:opacity-70"
+          style={{ fontFamily: INT, color: open ? 'rgba(249,250,251,0.4)' : YLW }}>
+          {open ? 'Cancel' : 'Change'}
+        </button>
+      </div>
+
+      {status === 'success' && (
+        <p className="px-5 pb-4 text-xs font-semibold" style={{ fontFamily: INT, color: '#34D399' }}>
+          ✓ Password updated successfully.
+        </p>
+      )}
+
+      {!open && status !== 'success' && (
+        <p className="px-5 pb-4 text-sm" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.2)' }}>
+          ••••••••
+        </p>
+      )}
+
+      <AnimatePresence>
+        {open && (
+          <motion.form
+            key="pw-form"
+            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+            onSubmit={handleSubmit}
+            className="px-5 pb-5 space-y-3"
+          >
+            {[
+              { k: 'current', label: 'Current Password',     ph: '••••••••',      min: 1   },
+              { k: 'next',    label: 'New Password',          ph: 'Min 8 chars',   min: 8   },
+              { k: 'confirm', label: 'Confirm New Password',  ph: '••••••••',      min: 8   },
+            ].map(({ k, label, ph, min }) => (
+              <div key={k}>
+                <p className="text-[10px] uppercase tracking-wider mb-1"
+                  style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
+                <input
+                  type="password"
+                  value={form[k]}
+                  onChange={set(k)}
+                  placeholder={ph}
+                  required
+                  minLength={min}
+                  maxLength={128}
+                  {...fieldStyle}
+                />
+              </div>
+            ))}
+
+            {status && status !== 'success' && (
+              <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{status}</p>
+            )}
+
+            <button type="submit" disabled={loading}
+              className="w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
+              style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>
+              {loading
+                ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                : 'Update Password'
+              }
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export default function MemberProfile() {
-  const { profile }  = useAuth()
+  const { profile, user } = useAuth()
   const navigate     = useNavigate()
   const [editing, setEditing]     = useState(false)
   const [saved,   setSaved]       = useState(false)
@@ -214,14 +320,14 @@ export default function MemberProfile() {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="space-y-3 pt-1">
                   {[
-                    { k: 'full_name',     label: 'Full Name',    type: 'text',   ph: 'Rahul Sharma'      },
-                    { k: 'phone',         label: 'Phone',        type: 'tel',    ph: '+91 98765 43210'   },
-                    { k: 'date_of_birth', label: 'Date of Birth', type: 'date',  ph: ''                  },
-                  ].map(({ k, label, type, ph }) => (
+                    { k: 'full_name',     label: 'Full Name',    type: 'text',   ph: 'Rahul Sharma',    maxLength: 100 },
+                    { k: 'phone',         label: 'Phone',        type: 'tel',    ph: '+91 98765 43210', maxLength: 20  },
+                    { k: 'date_of_birth', label: 'Date of Birth', type: 'date',  ph: '',                maxLength: undefined },
+                  ].map(({ k, label, type, ph, maxLength }) => (
                     <div key={k}>
                       <p className="text-[10px] uppercase tracking-wider mb-1"
                         style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
-                      <input type={type} value={form[k]} onChange={set(k)} placeholder={ph} {...fieldStyle} />
+                      <input type={type} value={form[k]} onChange={set(k)} placeholder={ph} maxLength={maxLength} {...fieldStyle} />
                     </div>
                   ))}
 
@@ -246,7 +352,7 @@ export default function MemberProfile() {
                   </div>
 
                   {saveError && (
-                    <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{saveError.message}</p>
+                    <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{friendlyError(saveError)}</p>
                   )}
 
                   <button
@@ -327,6 +433,9 @@ export default function MemberProfile() {
             </Link>
           </div>
         </div>
+
+        {/* ── Password ── */}
+        <ChangePasswordSection userEmail={user?.email} />
 
         {/* ── Account / Sign Out ── */}
         <div className="rounded-2xl overflow-hidden" style={{ background: CRD, border: `1px solid ${BRD}` }}>

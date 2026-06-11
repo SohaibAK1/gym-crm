@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, Lock, ArrowRight, Eye, EyeOff, QrCode, CreditCard, TrendingUp, CheckCircle, Dumbbell } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { friendlyError } from '../lib/errors'
 import Aurora from '../components/bits/Aurora'
 import BlurText from '../components/bits/BlurText'
 import CountUp from '../components/bits/CountUp'
@@ -61,7 +62,7 @@ export default function Login() {
       if (profile.role === 'admin') navigate('/admin/dashboard')
       else navigate('/member/home')
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.')
+      setError(friendlyError(err))
     } finally {
       setLoading(false)
     }
@@ -217,6 +218,7 @@ export default function Login() {
                     required
                     autoComplete="email"
                     placeholder="you@example.com"
+                    maxLength={254}
                     className="w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none transition-colors duration-200"
                     style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.18)' }}
                     onFocus={e => e.currentTarget.style.borderColor = 'rgba(250,204,21,0.6)'}

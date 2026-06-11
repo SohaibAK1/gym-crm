@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Save, Loader, Plus, CheckCircle, XCircle, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import { useMember, useUpdateMember, useAddTrainerNote, useAdminBodyStats, useAdminLogBodyStats } from '../../hooks/useMembers'
+import { friendlyError } from '../../lib/errors'
 import { useMemberAttendance } from '../../hooks/useAttendance'
 import { useAddSubscription } from '../../hooks/useSubscriptions'
 
@@ -225,16 +226,16 @@ export default function AdminMemberDetail() {
 
             {saveError && (
               <p className="text-sm mb-4 px-3 py-2 rounded-xl" style={{ fontFamily: INT, color: '#F87171', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)' }}>
-                Save failed: {saveError.message}
+                {friendlyError(saveError)}
               </p>
             )}
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Full Name">
-                <input value={form.full_name ?? ''} onChange={setF('full_name')} {...editInp} />
+                <input value={form.full_name ?? ''} onChange={setF('full_name')} maxLength={100} {...editInp} />
               </Field>
               <Field label="Phone">
-                <input value={form.phone ?? ''} onChange={setF('phone')} type="tel" {...editInp} />
+                <input value={form.phone ?? ''} onChange={setF('phone')} type="tel" maxLength={20} {...editInp} />
               </Field>
               <Field label="Goal">
                 <select value={form.goal ?? ''} onChange={setF('goal')} {...selStyle}>
@@ -295,6 +296,7 @@ export default function AdminMemberDetail() {
             <form onSubmit={handleAddNote} className="flex gap-3 mb-5">
               <input value={noteText} onChange={e => setNoteText(e.target.value)}
                 placeholder="Add a private note about this member…"
+                maxLength={1000}
                 className="flex-1 px-4 py-2.5 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none"
                 style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: `1px solid ${BRD}` }} />
               <button type="submit" disabled={addingNote || !noteText.trim()}
@@ -346,18 +348,18 @@ export default function AdminMemberDetail() {
               >
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { k: 'logged_at',    label: 'Date',         type: 'date'   },
-                    { k: 'weight_kg',    label: 'Weight (kg)',  type: 'number' },
-                    { k: 'chest_cm',     label: 'Chest (cm)',   type: 'number' },
-                    { k: 'waist_cm',     label: 'Waist (cm)',   type: 'number' },
-                    { k: 'hips_cm',      label: 'Hips (cm)',    type: 'number' },
-                    { k: 'bicep_cm',     label: 'Bicep (cm)',   type: 'number' },
-                    { k: 'body_fat_pct', label: 'Body Fat (%)', type: 'number' },
-                    { k: 'height_cm',    label: 'Height (cm)',  type: 'number' },
-                  ].map(({ k, label, type }) => (
+                    { k: 'logged_at',    label: 'Date',         type: 'date',   min: undefined, max: undefined },
+                    { k: 'weight_kg',    label: 'Weight (kg)',  type: 'number', min: 0, max: 500   },
+                    { k: 'chest_cm',     label: 'Chest (cm)',   type: 'number', min: 0, max: 300   },
+                    { k: 'waist_cm',     label: 'Waist (cm)',   type: 'number', min: 0, max: 300   },
+                    { k: 'hips_cm',      label: 'Hips (cm)',    type: 'number', min: 0, max: 300   },
+                    { k: 'bicep_cm',     label: 'Bicep (cm)',   type: 'number', min: 0, max: 100   },
+                    { k: 'body_fat_pct', label: 'Body Fat (%)', type: 'number', min: 0, max: 100   },
+                    { k: 'height_cm',    label: 'Height (cm)',  type: 'number', min: 0, max: 300   },
+                  ].map(({ k, label, type, min, max }) => (
                     <div key={k}>
                       <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
-                      <input type={type} step="0.1" value={statsForm[k]} onChange={setS(k)}
+                      <input type={type} step="0.1" min={min} max={max} value={statsForm[k]} onChange={setS(k)}
                         className="w-full px-3 py-2 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
                         style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.12)' }}
                         onFocus={e => { e.target.style.borderColor = 'rgba(250,204,21,0.45)' }}
@@ -369,13 +371,14 @@ export default function AdminMemberDetail() {
                 <div>
                   <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>Notes</p>
                   <input value={statsForm.notes} onChange={setS('notes')} placeholder="Optional note"
+                    maxLength={500}
                     className="w-full px-3 py-2 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
                     style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: '1px solid rgba(250,204,21,0.12)' }}
                     onFocus={e => { e.target.style.borderColor = 'rgba(250,204,21,0.45)' }}
                     onBlur={e  => { e.target.style.borderColor = 'rgba(250,204,21,0.12)' }}
                   />
                 </div>
-                {statsError && <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{statsError.message}</p>}
+                {statsError && <p className="text-red-400 text-xs" style={{ fontFamily: INT }}>{friendlyError(statsError)}</p>}
                 <button type="submit" disabled={loggingStats}
                   className="w-full py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
                   style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>
@@ -500,7 +503,7 @@ export default function AdminMemberDetail() {
                   <option value="annual">Annual</option>
                 </select>
                 <input type="number" value={planForm.amount} onChange={e => setPlanForm(f => ({ ...f, amount: e.target.value }))}
-                  placeholder="Amount (₹)" required min="1"
+                  placeholder="Amount (₹)" required min="1" max="999999"
                   className="w-full px-3 py-2 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none"
                   style={{ fontFamily: INT, background: 'rgba(249,250,251,0.04)', border: `1px solid ${BRD}` }} />
                 <input type="date" value={planForm.start_date} onChange={e => setPlanForm(f => ({ ...f, start_date: e.target.value }))}

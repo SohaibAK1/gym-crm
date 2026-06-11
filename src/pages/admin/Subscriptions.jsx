@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlusCircle, X, ToggleLeft, ToggleRight } from 'lucide-react'
 import { useSubscriptions, useAddSubscription, useToggleSubscription } from '../../hooks/useSubscriptions'
+import { friendlyError } from '../../lib/errors'
 import { useMembers } from '../../hooks/useMembers'
 
 const BC  = "'Barlow Condensed', sans-serif"
@@ -106,7 +107,7 @@ function AddPlanModal({ open, onClose }) {
                       </select>
                     </Field>
                     <Field label="Amount (₹)" required>
-                      <input type="number" value={form.amount} onChange={set('amount')} required min="1"
+                      <input type="number" value={form.amount} onChange={set('amount')} required min="1" max="999999"
                         placeholder="e.g. 1200" {...inp} />
                     </Field>
                   </div>
@@ -114,9 +115,9 @@ function AddPlanModal({ open, onClose }) {
                     <input type="date" value={form.start_date} onChange={set('start_date')} required {...inp} />
                   </Field>
                   <Field label="Notes">
-                    <input value={form.notes} onChange={set('notes')} placeholder="Optional note" {...inp} />
+                    <input value={form.notes} onChange={set('notes')} placeholder="Optional note" maxLength={500} {...inp} />
                   </Field>
-                  {error && <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{error.message}</p>}
+                  {error && <p className="text-red-400 text-sm" style={{ fontFamily: INT }}>{friendlyError(error)}</p>}
                   <button type="submit" disabled={isPending}
                     className="w-full py-3 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2 transition-opacity hover:opacity-80"
                     style={{ fontFamily: INT, background: YLW, color: '#0A0A0A' }}>

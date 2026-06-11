@@ -72,16 +72,16 @@ function ExerciseRow({ ex, routineId, onDelete }) {
             className="overflow-hidden">
             <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 border-t" style={{ borderColor: 'rgba(249,250,251,0.06)' }}>
               {[
-                { k: 'name',         label: 'Exercise',  span: 'col-span-2 sm:col-span-4', type: 'text'   },
-                { k: 'sets',         label: 'Sets',       span: '',                          type: 'number' },
-                { k: 'reps',         label: 'Reps',       span: '',                          type: 'text'   },
-                { k: 'weight',       label: 'Weight',     span: '',                          type: 'text'   },
-                { k: 'rest_seconds', label: 'Rest (sec)', span: '',                          type: 'number' },
-                { k: 'notes',        label: 'Notes',      span: 'col-span-2 sm:col-span-4', type: 'text'   },
-              ].map(({ k, label, span, type }) => (
+                { k: 'name',         label: 'Exercise',  span: 'col-span-2 sm:col-span-4', type: 'text',   maxLength: 100, min: undefined, max: undefined },
+                { k: 'sets',         label: 'Sets',       span: '',                          type: 'number', maxLength: undefined, min: 1, max: 100 },
+                { k: 'reps',         label: 'Reps',       span: '',                          type: 'text',   maxLength: 30,  min: undefined, max: undefined },
+                { k: 'weight',       label: 'Weight',     span: '',                          type: 'text',   maxLength: 30,  min: undefined, max: undefined },
+                { k: 'rest_seconds', label: 'Rest (sec)', span: '',                          type: 'number', maxLength: undefined, min: 0, max: 3600 },
+                { k: 'notes',        label: 'Notes',      span: 'col-span-2 sm:col-span-4', type: 'text',   maxLength: 200, min: undefined, max: undefined },
+              ].map(({ k, label, span, type, maxLength, min, max }) => (
                 <div key={k} className={`mt-3 ${span}`}>
                   <p className="text-[10px] uppercase tracking-wider mb-1" style={{ fontFamily: INT, color: 'rgba(249,250,251,0.4)' }}>{label}</p>
-                  <input type={type} value={form[k]} onChange={set(k)} {...inp()} />
+                  <input type={type} value={form[k]} onChange={set(k)} maxLength={maxLength} min={min} max={max} {...inp()} />
                 </div>
               ))}
             </div>
@@ -114,12 +114,12 @@ function AddExerciseForm({ dayId, routineId, onDone }) {
     <form onSubmit={handleAdd} className="rounded-xl p-3" style={{ background: 'rgba(250,204,21,0.05)', border: '1px dashed rgba(250,204,21,0.2)' }}>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
         <div className="col-span-2 sm:col-span-4">
-          <input value={form.name} onChange={set('name')} required placeholder="Exercise name *" {...inp()} />
+          <input value={form.name} onChange={set('name')} required placeholder="Exercise name *" maxLength={100} {...inp()} />
         </div>
-        <input type="number" value={form.sets} onChange={set('sets')} placeholder="Sets" {...inp()} />
-        <input value={form.reps} onChange={set('reps')} placeholder="Reps" {...inp()} />
-        <input value={form.weight} onChange={set('weight')} placeholder="Weight" {...inp()} />
-        <input type="number" value={form.rest_seconds} onChange={set('rest_seconds')} placeholder="Rest (s)" {...inp()} />
+        <input type="number" value={form.sets} onChange={set('sets')} placeholder="Sets" min={1} max={100} {...inp()} />
+        <input value={form.reps} onChange={set('reps')} placeholder="Reps" maxLength={30} {...inp()} />
+        <input value={form.weight} onChange={set('weight')} placeholder="Weight" maxLength={30} {...inp()} />
+        <input type="number" value={form.rest_seconds} onChange={set('rest_seconds')} placeholder="Rest (s)" min={0} max={3600} {...inp()} />
       </div>
       <div className="flex gap-2">
         <button type="submit" disabled={isPending || !form.name.trim()}
@@ -273,7 +273,7 @@ export default function RoutineBuilder() {
         <form onSubmit={handleAddDay} className="rounded-2xl p-4 flex gap-3"
           style={{ background: CRD, border: `1px solid rgba(250,204,21,0.2)` }}>
           <input value={newDayName} onChange={e => setNewDayName(e.target.value)} required
-            placeholder="e.g. Day 1 – Push" autoFocus
+            placeholder="e.g. Day 1 – Push" autoFocus maxLength={50}
             className="flex-1 px-4 py-2.5 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none"
             style={{ fontFamily: INT, background: 'rgba(249,250,251,0.05)', border: '1px solid rgba(250,204,21,0.2)' }} />
           <button type="submit" disabled={addingDay || !newDayName.trim()}
