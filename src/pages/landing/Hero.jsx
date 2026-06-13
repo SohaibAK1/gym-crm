@@ -7,123 +7,9 @@ import CountUp      from '../../components/bits/CountUp'
 import Threads      from '../../components/bits/Threads'
 import GlitchText   from '../../components/bits/GlitchText'
 import RotatingText from '../../components/bits/RotatingText'
-import TiltCard     from '../../components/bits/TiltCard'
 import Magnet       from '../../components/bits/Magnet'
-import { BC, INT, IBP, V, BG, BDR, CRD } from './constants'
-
-const TODAY_WORKOUT = [
-  { name: 'Bench Press',     sets: '4 × 10', done: true  },
-  { name: 'Shoulder Press',  sets: '3 × 12', done: true  },
-  { name: 'Tricep Dips',     sets: '3 × 15', done: false },
-  { name: 'Cable Fly',       sets: '3 × 12', done: false },
-]
-
-const RECENT_CHECKINS = [
-  { day: 'Today',     time: '09:14 AM' },
-  { day: 'Yesterday', time: '08:52 AM' },
-  { day: 'Monday',    time: '09:30 AM' },
-]
-
-function MemberCard() {
-  return (
-    <div
-      className="w-full max-w-sm rounded-xl overflow-hidden select-none"
-      style={{
-        background: CRD,
-        border:     `1px solid ${BDR}`,
-        borderTop:  '2px solid #FACC15',
-        boxShadow:  '0 0 60px rgba(250,204,21,0.12), 0 40px 80px rgba(0,0,0,0.4)',
-      }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${BDR}`, background: 'rgba(250,204,21,0.03)' }}
-      >
-        <div className="flex items-center gap-2">
-          <motion.span
-            animate={{ opacity: [1, 0.25, 1] }}
-            transition={{ duration: 1.6, repeat: Infinity }}
-            className="w-2 h-2 rounded-full"
-            style={{ background: '#FACC15' }}
-            aria-hidden="true"
-          />
-          <span className="text-xs tracking-[0.16em]" style={{ fontFamily: IBP, color: '#FACC15' }}>
-            MY DASHBOARD
-          </span>
-        </div>
-        <span className="text-[10px] tracking-wider" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.35)' }}>
-          IronHub
-        </span>
-      </div>
-
-      {/* Streak / Workouts / Attendance */}
-      <div className="grid grid-cols-3" style={{ borderBottom: `1px solid ${BDR}` }}>
-        {[
-          { val: '14',  label: 'DAY STREAK', c: '#FACC15' },
-          { val: '47',  label: 'WORKOUTS',   c: '#FACC15' },
-          { val: '91%', label: 'ATTENDANCE', c: '#34D399' },
-        ].map(({ val, label, c }, i) => (
-          <div
-            key={label}
-            className="px-4 py-4"
-            style={{ borderRight: i < 2 ? `1px solid ${BDR}` : 'none' }}
-          >
-            <div className="text-xl font-bold mb-0.5" style={{ fontFamily: IBP, color: c }}>{val}</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
-              {label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Today's workout */}
-      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${BDR}` }}>
-        <div className="text-[9px] tracking-[0.2em] mb-3 uppercase" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
-          TODAY — PUSH DAY
-        </div>
-        {TODAY_WORKOUT.map(({ name, sets, done }) => (
-          <div key={name} className="flex items-center gap-2.5 py-1.5">
-            <span
-              className="w-3.5 h-3.5 rounded-sm flex-shrink-0 flex items-center justify-center"
-              style={{
-                background: done ? '#FACC15' : 'transparent',
-                border:     done ? 'none' : '1px solid rgba(249,250,251,0.2)',
-              }}
-              aria-hidden="true"
-            >
-              {done && <span style={{ fontSize: '8px', color: '#0A0A0A', fontWeight: 700 }}>✓</span>}
-            </span>
-            <span className="text-xs flex-1" style={{ fontFamily: IBP, color: done ? 'rgba(249,250,251,0.4)' : 'rgba(249,250,251,0.75)', textDecoration: done ? 'line-through' : 'none' }}>
-              {name}
-            </span>
-            <span className="text-[9px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{sets}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent check-ins */}
-      <div className="px-5 py-4">
-        <div className="text-[9px] tracking-[0.2em] uppercase mb-3" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.4)' }}>
-          RECENT CHECK-INS
-        </div>
-        {RECENT_CHECKINS.map(({ day, time }) => (
-          <div
-            key={day}
-            className="flex items-center justify-between py-1.5"
-            style={{ borderBottom: `1px solid rgba(249,250,251,0.04)` }}
-          >
-            <span className="text-xs" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.7)' }}>{day}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px]" style={{ fontFamily: IBP, color: 'rgba(249,250,251,0.3)' }}>{time}</span>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#34D399' }} aria-hidden="true" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+import WorkoutSessionCard from './WorkoutSessionCard'
+import { BC, INT, IBP, BG } from './constants'
 
 export default function Hero() {
   return (
@@ -280,23 +166,19 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* Member card with tilt */}
+          {/* Live workout session card */}
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center lg:justify-end"
+            className="relative w-full"
           >
-            <div className="relative">
-              <div
-                className="absolute -inset-12 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse, rgba(250,204,21,0.15) 0%, transparent 70%)', filter: 'blur(24px)' }}
-                aria-hidden="true"
-              />
-              <TiltCard rotateAmplitude={8} scaleOnHover={1.03}>
-                <MemberCard />
-              </TiltCard>
-            </div>
+            <div
+              className="absolute -inset-12 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse, rgba(250,204,21,0.12) 0%, transparent 70%)', filter: 'blur(32px)' }}
+              aria-hidden="true"
+            />
+            <WorkoutSessionCard />
           </motion.div>
         </div>
       </div>

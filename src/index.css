@@ -107,3 +107,24 @@ body::before {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Spline loader spinner ───────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(250, 204, 21, 0.2);
+  border-top-color: #FACC15;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ── Spotlight animation ─────────────────────────────────────────────────── */
+@keyframes spotlight {
+  0%   { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+}
